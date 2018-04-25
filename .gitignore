@@ -1,3 +1,12 @@
+# Don't Add images to repo or documents
+*.png
+*.jpg
+*.pdf
+*.doc
+*.docx
+*.odt
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
