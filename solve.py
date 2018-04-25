@@ -50,11 +50,12 @@ from mpl_toolkits.mplot3d import axes3d
 
 def uex(x, y, t=0):
     # for a particle in a box, infinite potential
-    n = 1
+    nx, ny = 1, 1
     a = 2
     m = 1
     hbar = 1
-    phit = np.exp(-1j*t*(hbar*(n*np.pi)**2)/(2*m*a*a))
+    En = (((hbar*np.pi)**2)/(2*m*a*a))*(nx**2 + ny**2)
+    phit = np.exp(-1j*t*En/hbar)
     return np.cos(x*np.pi/2)*np.cos(y*np.pi/2)*phit
 
 def uinit(x,y):
@@ -63,6 +64,63 @@ def uinit(x,y):
     ud = 0.                        # u = ud on Dirichlet, 0 bc V = inf
     bctyp = 3                      # 3: DDDD
     return u, ud, bctyp
+
+
+
+
+# adds a figure in a series of images
+def myplot(u, x, y, t, fig=None, initial=False):
+    # Booleans to Graph the Error and Graph the Probability Distribution
+    err = 1
+    graph_prob=True
+
+    if err:
+        u0 = np.copy(u)
+        ux = uex(x, y, t)
+        error_real = np.abs(np.abs(ux.real) - np.abs(u.real))
+        error_imag = np.abs(np.abs(ux.imag) - np.abs(u.imag))
+        u = error_real + error_imag*1j
+    (r, c) = (2, 4) if graph_prob else (2,2)
+
+
+    def mysubplot(u, x, y, t, i, name, fig):
+        ax1 = fig.add_subplot(r,c,i*2-1)
+        surf = ax1.contourf(x,y,u)
+        fig.colorbar(surf)
+        ax1.set_title(str(name)+' t=%f'%t)
+        ax = fig.add_subplot(r,c,2*i,projection='3d')
+        wframe = ax.plot_wireframe(x, y, u)
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('u')
+        return fig
+
+    # if first plot then Plot initial field
+    if initial or fig is None:
+        fig = plt.figure(figsize=(12,12))
+    else:
+        plt.clf()
+
+    fig = mysubplot(u.real, x, y, t, 1, "Real", fig)
+    fig = mysubplot(u.imag, x, y, t, 2, "Imaginary", fig)
+    if graph_prob:
+        if err:
+            px = np.abs(np.conj(ux)*ux)
+            pu = np.abs(np.conj(u0)*u0)
+            prob = np.conj(ux)*ux - np.conj(u0)*u0
+        else:
+            prob = np.conj(u)*u
+        # plot probability distribution
+        fig = mysubplot(prob, x, y, t, 3, "Probability Distribution", fig)
+
+    plt.pause(0.06)
+    return fig
+
+
+
+
+
+
 
 # p is the discretization in space
 # nt is the number of timesteps
@@ -141,76 +199,13 @@ def advdif(p,T,nt,nplt, verbose=True):
 
     t = 0.
 
-    def myplot(u, t, fig=None, initial=False):
-        # Booleans to Graph the Error and Graph the Probability Distribution
-        err = 1
-        graph_prob=True
-
-        if err:
-            u0 = u
-            ux = uex(X, Y, t)
-            error_real = np.abs(np.abs(ux.real) - np.abs(u.real))
-            error_imag = np.abs(np.abs(ux.imag) - np.abs(u.imag))
-            #u.real = error_real
-            #u.imag = error_imag
-            u = error_real + error_imag*1j
-        if graph_prob:
-            r, c = 2, 4
-        else:
-            r, c = 2,2
-        if initial or fig is None:
-            # Plot initial field
-            fig = plt.figure(figsize=(12,12))
-        else:
-            plt.clf()
-        ax1 = fig.add_subplot(r,c,1)
-        surf = ax1.contourf(X,Y,u.real)
-        fig.colorbar(surf)
-        ax1.set_title('Real t=%f'%t)
-        ax = fig.add_subplot(r,c,2,projection='3d')
-        wframe = ax.plot_wireframe(X, Y, u.real)
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('u')
-
-        # plot complex
-        ax1 = fig.add_subplot(r,c,3)
-        surf = ax1.contourf(X,Y,u.imag)
-        fig.colorbar(surf)
-        ax1.set_title('Imaginary t=%f'%t)
-        ax = fig.add_subplot(r,c,4,projection='3d')
-        wframe = ax.plot_wireframe(X, Y, u.imag)
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('u')
-
-        if graph_prob:
-            if err:
-                prob = np.conj(ux)*ux - np.conj(u0)*u0
-            else:
-                prob = np.conj(u)*u
-            #print(np.max(prob))
-            # plot probability distribution
-            ax1 = fig.add_subplot(r,c,5)
-            surf = ax1.contourf(X,Y,prob)
-            fig.colorbar(surf)
-            ax1.set_title('Probability Distribution t=%f'%t)
-            ax = fig.add_subplot(r,c,6,projection='3d')
-            wframe = ax.plot_wireframe(X, Y, prob)
-            ax.set_xlabel('X')
-            ax.set_ylabel('Y')
-            ax.set_zlabel('u')
-
-        plt.pause(0.06)
-        return fig
-
 
     er, es = [], []
     ux = uex(X, Y, t)
     error_real = la.norm(ux.real.flatten() - u.real.flatten(), np.inf)
     error_imag = la.norm(ux.imag.flatten() - u.imag.flatten(), np.inf)
     if verbose:
-        fig = myplot(u, t, initial=True)
+        fig = myplot(u, X, Y, t, initial=True)
         print()
         print("Time=",t)
         print("Total Probability: ", np.sum(np.conj(u)*u)*(h**2))
@@ -248,7 +243,7 @@ def advdif(p,T,nt,nplt, verbose=True):
             error_real = la.norm(ux.real.flatten() - u.real.flatten(), np.inf)
             error_imag = la.norm(ux.imag.flatten() - u.imag.flatten(), np.inf)
             if verbose:
-                fig = myplot(u, t, fig)
+                fig = myplot(u, X, Y, t, fig)
                 print()
                 print("Time=",t)
                 print("Total Probability: ", np.sum(np.conj(u)*u)*(h**2))
@@ -260,6 +255,7 @@ def advdif(p,T,nt,nplt, verbose=True):
     print(p, nt, er[-1], es[-1])
     plt.figure()
     plt.title("Error "+str(p)+" "+str(nt))
+    plt.yscale("log")
     plt.plot(er, label="Real Error")
     plt.plot(es, label="Imaginary Error")
     plt.legend()
@@ -274,11 +270,11 @@ def advdif(p,T,nt,nplt, verbose=True):
 # p=27 and nt = 2000 works
 # if p / nt is too large it blows up again
 # however, its not stable for longer time periods
-p    = 25
-T    = .1
-nt   = 90
-nplt = 30
-succ = advdif(p,T,nt,nplt)
+p    = 30
+T    = 10
+nt   = 600
+nplt = 50
+succ = advdif(p,T,nt,nplt,verbose=False)
 """
 for p in [10, 11, 26, 27, 44, 45]:
     for nt in np.power(10, np.array([1,2,3,4])):
