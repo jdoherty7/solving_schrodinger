@@ -1,12 +1,13 @@
 import numpy as np
+import numpy.linalg as la
 import scipy.sparse as sp
 import matplotlib.pyplot as plt
 from pylab import *
 from math import pi,cos
 # Run parameters
-nx = 35
-ny = 35
-nt = 5000
+nx = 20
+ny = 20
+nt = 500
 lx = 1.0
 ly = 1.0
 tf = 1
@@ -15,16 +16,35 @@ dy = ly / ( ny - 1.0 )
 dt = tf / ( nt - 1.0 )
 x = np.linspace(0+dx,1-dx,nx)
 y = np.linspace(0+dy,1-dy,ny)
+X, Y = np.meshgrid(x, y)
 m = 1
 hbar = 1
 
+# x, y \in [0, 1]^2
+
+def uex(x, y, t=0):
+    nx, ny = 3,2
+    a = 1
+    m = 1
+    hbar = 1
+    En = (((hbar*np.pi)**2)/(2*m*a*a))*(nx**2 + ny**2)
+    phit = np.exp(-1j*t*En/hbar)
+    return np.sin(nx*x*np.pi)*np.sin(ny*y*np.pi)*phit
+    #elif nx == 2:
+    #    return 0.5 * ( sin(pi*x)*sin(pi*y) + sin(2*pi*x)*sin(2*pi*y) )*phit
+
+
+
+
+
 # Define the potential and the initial wavefunction
 v = np.empty((nx,ny))
-psi = np.empty((nx,ny),dtype=complex)
+psi = np.empty((nx,ny),dtype=np.complex128)
 for i in range(0,nx):
-	for j in range(0,ny):
-		v[i,j] = 0.0
-		psi[i,j] = 0.5 * ( sin(pi*x[i])*sin(pi*y[j]) + sin(2*pi*x[i])*sin(2*pi*y[j]) )
+    for j in range(0,ny):
+        v[i,j] = 0.0
+        psi[i,j] = uex(x[i], y[j])
+
 
 # 1d arrays
 psi1d = psi.reshape((nx*ny),order='F')
@@ -49,12 +69,16 @@ u = np.matmul(np.linalg.inv(lhs),rhs)
 
 # Apply succesively
 for i in range(0,nt):
-	psi1d = u.dot(psi1d)
-	psi = psi1d.reshape((nx,ny),order='F')
-	pdens = np.real(psi * np.conj(psi))
-	print pdens
-	plt.cla()
-        plt.clf()
-	im = plt.imshow(pdens,cmap=cm.RdBu,origin='lower',interpolation='bilinear',extent=[0,1,0,1],vmin=0,vmax=1)
-	cb = plt.colorbar(im)
-	plt.pause(0.001)
+    psi1d = u.dot(psi1d)
+    # need the transpose here
+    psi = psi1d.reshape((nx,ny),order='F').T
+    pdens = np.real(psi * np.conj(psi))
+    #print pdens
+    ux = uex(X, Y, i*dt)
+    error = la.norm((pdens - (np.conj(ux) * ux)).flatten(), np.inf)
+    #print error
+    plt.cla()
+    plt.clf()
+    im = plt.imshow(pdens,cmap=cm.RdBu,origin='lower',interpolation='bilinear',extent=[0,1,0,1],vmin=0,vmax=1)
+    cb = plt.colorbar(im)
+    plt.pause(0.001)
