@@ -26,8 +26,8 @@ def integral(f, n=3):
 mesh = gmsh.Mesh()
 mesh.read_msh('sqmesh.msh') # coarse
 
-hbar, m = 1, 1
-lx, ly = 1, 1
+hbar, m = 1.0, 1.0
+lx, ly = 1.0, 1.0
 
 ## Only works for quadratic triangle elements
 # degree = 1 num_bases = 3
@@ -87,8 +87,7 @@ for t in range(ne):
         return detJ*np.dot(dlambda.T, dlambda)
 
 
-    A_local = 1j*integral(g)*(hbar/(2*m))
-
+    A_local = 1j*integral(g)*(hbar/(2.0*m))
 
     # assign to global matrices
     AA[t, :] = A_local.ravel()
@@ -100,15 +99,13 @@ for t in range(ne):
 
 
 
-A = sparse.coo_matrix((AA.ravel(), (IA.ravel(), JA.ravel())))
+A = sparse.coo_matrix((AA.ravel(), (IA.ravel(), JA.ravel())), dtype= np.complex128)
 A = A.tocsr()
 A = A.tocoo()
 
 # First flag the locations of the boundary 
 tol = 1e-12
-Dflag = np.logical_or.reduce((#abs(1-  np.sqrt(X**2 + Y**2)),
-                              #abs(1-2*np.sqrt(X**2 + Y**2))
-                              abs(1-np.abs(X)) < tol,
+Dflag = np.logical_or.reduce((abs(1-np.abs(X)) < tol,
                               abs(1-np.abs(Y)) < tol,
                               abs(X) < tol,
                               abs(Y) < tol
@@ -141,11 +138,10 @@ plot = True
 
 if plot:
     fig = plt.figure()
-nt = 60
-tf = 100.0
+nt = 100
+tf = .01
 # dt may be incorrect
 dt = tf/(nt+1.0)
-v = -1
 errors = {"EB":[], "EF":[]}
 
 EBM = sparse.eye(A.shape[0]).tocsc() - dt*A.tocsc()
@@ -163,7 +159,7 @@ for method in ["EB", "EF"]:
         if plot:
             plt.clf()
             ax = fig.add_subplot(1,1,1)
-            ax.set_title("Probability Distribution "+ method +" t={0:.2f}/{1:.2f}".format(dt*i, tf))
+            ax.set_title("Probability Distribution "+ method +" t={0:.3f}/{1:.3f}".format(dt*i, tf))
             ax.set_xlabel("x")
             ax.set_ylabel("y")
             surf = ax.tripcolor(X, Y, pdist, triangles=E[:,:num_bases], cmap=plt.cm.jet, linewidth=0.2)
