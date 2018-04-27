@@ -44,7 +44,7 @@ Y = V[:,1].astype(np.complex128)
 
 
 def uex(x, y, t=0):
-    nx, ny = 3, 2
+    nx, ny = 3, 4
     En = (((hbar*np.pi)**2)/(2*m*lx*ly))*(nx**2 + ny**2)
     phit = np.exp(-1j*t*En/hbar)
     N = (np.sqrt(2)/lx)*(np.sqrt(2)/ly)
@@ -141,20 +141,36 @@ plot = True
 
 if plot:
     fig = plt.figure()
-nt = 100
-tf = .1
+nt = 60
+tf = 100.0
 # dt may be incorrect
-dt = tf/(nt+1)
+dt = tf/(nt+1.0)
 v = -1
 errors = {"EB":[], "EF":[]}
 
-EBM = sparse.eye(A.shape[0]) - dt*A.tocsc()
+EBM = sparse.eye(A.shape[0]).tocsc() - dt*A.tocsc()
 inv_A = spla.splu(EBM)
 #plt.figure()
-for method in ["EB"]:
+for method in ["EB", "EF"]:
     u = uex(X, Y)
     for i in range(nt):
-        #plt.zlabel("u")
+        ux = uex(X, Y, i*nt)
+        pdist      = np.real(np.conj(u)*u)
+        pdist_true = np.real(np.conj(ux)*ux)
+        er = la.norm((pdist_true - pdist).flatten(), np.inf)
+        errors[method].append(er)
+
+        if plot:
+            plt.clf()
+            ax = fig.add_subplot(1,1,1)
+            ax.set_title("Probability Distribution "+ method +" t={0:.2f}/{1:.2f}".format(dt*i, tf))
+            ax.set_xlabel("x")
+            ax.set_ylabel("y")
+            surf = ax.tripcolor(X, Y, pdist, triangles=E[:,:num_bases], cmap=plt.cm.jet, linewidth=0.2)
+            #fig.colorbar(surf)
+            plt.pause(.001)
+
+        # go to next step
         if method == "EF":
             # Euler Forward O(dt)
             u = u - dt*A.dot(u)
@@ -162,20 +178,8 @@ for method in ["EB"]:
             # Euler Backward O(dt) but stable
             u = inv_A.solve(u)
 
-        ux = uex(X, Y, i*nt)
-        pdist      = np.real(np.conj(u)*u)
-        pdist_true = np.real(np.conj(ux)*ux)
-        er = la.norm((pdist_true - pdist).flatten(), np.inf)
-        errors[method].append(er)
-        if plot:
-            plt.clf()
-            ax = fig.add_subplot(1,1,1)
-            ax.set_title("Probability Distribution t={0:.2f}/{1:.2f}".format(dt*i, tf))
-            ax.set_xlabel("x")
-            ax.set_ylabel("y")
-            surf = ax.tripcolor(X, Y, pdist, triangles=E[:,:num_bases], cmap=plt.cm.jet, linewidth=0.2)
-            #fig.colorbar(surf)
-            plt.pause(dt**4)
+
+
 
 
 plt.figure()
