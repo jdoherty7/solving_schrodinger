@@ -7,7 +7,7 @@ from math import pi,cos
 # Run parameters
 nx = 20
 ny = 20
-nt = 500
+nt = 50
 lx = 1.0
 ly = 1.0
 tf = 1
@@ -23,11 +23,8 @@ hbar = 1
 # x, y \in [0, 1]^2
 
 def uex(x, y, t=0):
-    nx, ny = 3,2
-    a = 1
-    m = 1
-    hbar = 1
-    En = (((hbar*np.pi)**2)/(2*m*a*a))*(nx**2 + ny**2)
+    nx, ny = 1,1
+    En = (((hbar*np.pi)**2)/(2*m*lx*ly))*(nx**2 + ny**2)
     phit = np.exp(-1j*t*En/hbar)
     return np.sin(nx*x*np.pi)*np.sin(ny*y*np.pi)*phit
     #elif nx == 2:
@@ -38,7 +35,7 @@ def uex(x, y, t=0):
 
 
 # Define the potential and the initial wavefunction
-v = np.empty((nx,ny))
+v = np.zeros((nx,ny))
 psi = np.empty((nx,ny),dtype=np.complex128)
 for i in range(0,nx):
     for j in range(0,ny):
@@ -68,6 +65,8 @@ rhs = ident + ( ( imag * hbar * dt ) / ( 4.0 * m ) ) - ( ( imag * dt ) / ( 2.0 *
 u = np.matmul(np.linalg.inv(lhs),rhs)
 
 # Apply succesively
+errors = []
+plt.figure()
 for i in range(0,nt):
     psi1d = u.dot(psi1d)
     # need the transpose here
@@ -75,10 +74,22 @@ for i in range(0,nt):
     pdens = np.real(psi * np.conj(psi))
     #print pdens
     ux = uex(X, Y, i*dt)
-    error = la.norm((pdens - (np.conj(ux) * ux)).flatten(), np.inf)
+    error = la.norm((pdens - np.real(np.conj(ux) * ux)).flatten(), np.inf)
+    errors.append(error)
     #print error
+    #pdens = np.real(np.conj(ux) * ux)
     plt.cla()
     plt.clf()
+    plt.title("t={0:3}/{1}".format(i*dt, nt*dt))
     im = plt.imshow(pdens,cmap=cm.RdBu,origin='lower',interpolation='bilinear',extent=[0,1,0,1],vmin=0,vmax=1)
     cb = plt.colorbar(im)
     plt.pause(0.001)
+
+
+plt.figure()
+print errors
+plt.plot(errors)
+plt.ylabel("Error")
+plt.xlabel("Iteration")
+plt.title("Maximum Error of Probability Distribution")
+plt.show()
