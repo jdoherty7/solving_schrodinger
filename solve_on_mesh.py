@@ -144,7 +144,7 @@ if plot:
 nt = 100
 tf = .1
 # dt may be incorrect
-dt = tf/nt
+dt = tf/(nt+1)
 v = -1
 errors = {"EB":[], "EF":[]}
 
