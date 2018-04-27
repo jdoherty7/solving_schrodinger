@@ -106,7 +106,7 @@ for t in range(ne):
     A_local = integral(g)
     A_local = np.dot(la.inv(B_local), A_local)
 
-    A_local = 1j*A_local*(hbar/(2.0*m))
+    A_local = -1j*A_local*(hbar/(2.0*m))
 
     # assign to global matrices
     AA[t, :] = A_local.ravel()
