@@ -67,8 +67,8 @@ for t in range(ne):
         for i in range(1, num_bases+1):
             dphi[0, i-1] = dphi_dr(i, r, s)
             dphi[1, i-1] = dphi_ds(i, r, s)
-        dx = dphi @ X[K]
-        dy = dphi @ Y[K]
+        dx = np.dot(dphi, X[K])
+        dy = np.dot(dphi, Y[K])
         J[0, :] = dx
         J[1, :] = dy
         return J
@@ -82,9 +82,9 @@ for t in range(ne):
         for i in range(1,num_bases+1):
             dphi[0, i-1] = dphi_dr(i, r, s)
             dphi[1, i-1] = dphi_ds(i, r, s)
-        dlambda = invJ @ dphi
+        dlambda = np.dot(invJ, dphi)
 
-        return detJ*(dlambda.T @ dlambda)
+        return detJ*np.dot(dlambda.T, dlambda)
 
 
     A_local = 1j*integral(g)*(hbar/(2*m))
