@@ -23,7 +23,7 @@ hbar = 1
 # x, y \in [0, 1]^2
 
 def uex(x, y, t=0):
-    nx, ny = 1,1
+    nx, ny = 2,2
     En = (((hbar*np.pi)**2)/(2*m*lx*ly))*(nx**2 + ny**2)
     phit = np.exp(-1j*t*En/hbar)
     return np.sin(nx*x*np.pi)*np.sin(ny*y*np.pi)*phit
@@ -31,6 +31,9 @@ def uex(x, y, t=0):
     #    return 0.5 * ( sin(pi*x)*sin(pi*y) + sin(2*pi*x)*sin(2*pi*y) )*phit
 
 
+# Harmonic Oscillator
+def vex(x, y, t=0):
+    return x*x*y*y
 
 
 
@@ -73,21 +76,18 @@ for i in range(0,nt):
     psi = psi1d.reshape((nx,ny),order='F').T
     pdens = np.real(psi * np.conj(psi))
     #print pdens
+    # find exact solution and find error with calculated solution
     ux = uex(X, Y, i*dt)
     error = la.norm((pdens - np.real(np.conj(ux) * ux)).flatten(), np.inf)
     errors.append(error)
-    #print error
-    #pdens = np.real(np.conj(ux) * ux)
-    plt.cla()
     plt.clf()
-    plt.title("t={0:3}/{1}".format(i*dt, nt*dt))
+    plt.title("t={0:.3f}/{1:.3f}".format(i*dt, tf))
     im = plt.imshow(pdens,cmap=cm.RdBu,origin='lower',interpolation='bilinear',extent=[0,1,0,1],vmin=0,vmax=1)
     cb = plt.colorbar(im)
     plt.pause(0.001)
 
 
 plt.figure()
-print errors
 plt.plot(errors)
 plt.ylabel("Error")
 plt.xlabel("Iteration")
