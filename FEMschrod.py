@@ -25,44 +25,44 @@ X = V[:,0]
 Y = V[:,1]
 
 def gradphi(funcnum,r,s):
-	if funcnum == 0:
-		grad = np.array([-3.0+4.0*r+4.0*s,-3.0+4.0*r+4.0*s])
-	elif funcnum == 1:
-		grad = np.array([-1.0+4.0*r,0.0])
-	elif funcnum == 2:
-		grad = np.array([0.0,4.0*s-1.0])		
-	elif funcnum == 3:
-		grad = np.array([4.0-8.0*r-4.0*s,-4.0*r])		
-	elif funcnum == 4:
-		grad = np.array([4.0*s,4.0*r])		
-	elif funcnum == 5:
-		grad = np.array([-4.0*s,4.0-4.0*r-8.0*s])
-	return grad
+    if funcnum == 0:
+        grad = np.array([-3.0+4.0*r+4.0*s,-3.0+4.0*r+4.0*s])
+    elif funcnum == 1:
+        grad = np.array([-1.0+4.0*r,0.0])
+    elif funcnum == 2:
+        grad = np.array([0.0,4.0*s-1.0])        
+    elif funcnum == 3:
+        grad = np.array([4.0-8.0*r-4.0*s,-4.0*r])       
+    elif funcnum == 4:
+        grad = np.array([4.0*s,4.0*r])      
+    elif funcnum == 5:
+        grad = np.array([-4.0*s,4.0-4.0*r-8.0*s])
+    return grad
 
 def phi(funcnum,r,s):
-	if funcnum == 0:
-		val = (1.0-r-s)*(1.0-2.0*r-2.0*s)
-	elif funcnum == 1:
-		val = r * ( 2.0*r - 1.0)
-	elif funcnum == 2:
-		val = s * ( 2.0*s - 1.0)
-	elif funcnum == 3:
-		val = 4.0*r*(1.0-r-s)
-	elif funcnum == 4:
-		val = 4.0*r*s
-	elif funcnum == 5:
-		val = 4.0*s*(1.0-r-s)
-	return val
+    if funcnum == 0:
+        val = (1.0-r-s)*(1.0-2.0*r-2.0*s)
+    elif funcnum == 1:
+        val = r * ( 2.0*r - 1.0)
+    elif funcnum == 2:
+        val = s * ( 2.0*s - 1.0)
+    elif funcnum == 3:
+        val = 4.0*r*(1.0-r-s)
+    elif funcnum == 4:
+        val = 4.0*r*s
+    elif funcnum == 5:
+        val = 4.0*s*(1.0-r-s)
+    return val
 
 def getJ(x0,y0,x1,y1,x2,y2,x3,y3,x4,y4,x5,y5,r,s):
-	j11 = (-3.0 + 4.0*r + 4.0*s)*x0 + (4.0*r - 1.0)*x1 - 4.0*(-1.0 + 2.0*r + s)*x3 + 4.0*s*(x4 - x5)
-	j12 = (-3.0 + 4.0*r + 4.0*s)*x0 + (4.0*s - 1.0)*x2 + 4.0*r*(x4 - x3) - 4.0*x5*(2.0*s + r - 1.0)
-	j21 = (-3.0 + 4.0*r + 4.0*s)*y0 + (4.0*r - 1.0)*y1 - 4.0*(-1.0 + 2.0*r + s)*y3 + 4.0*s*(y4 - y5)
-	j22 = (-3.0 + 4.0*r + 4.0*s)*y0 + (4.0*s - 1.0)*y2 + 4.0*r*(y4 - y3) - 4.0*y5*(2.0*s + r - 1.0)
-	return np.array([[j11,j12],[j21,j22]])
+    j11 = (-3.0 + 4.0*r + 4.0*s)*x0 + (4.0*r - 1.0)*x1 - 4.0*(-1.0 + 2.0*r + s)*x3 + 4.0*s*(x4 - x5)
+    j12 = (-3.0 + 4.0*r + 4.0*s)*x0 + (4.0*s - 1.0)*x2 + 4.0*r*(x4 - x3) - 4.0*x5*(2.0*s + r - 1.0)
+    j21 = (-3.0 + 4.0*r + 4.0*s)*y0 + (4.0*r - 1.0)*y1 - 4.0*(-1.0 + 2.0*r + s)*y3 + 4.0*s*(y4 - y5)
+    j22 = (-3.0 + 4.0*r + 4.0*s)*y0 + (4.0*s - 1.0)*y2 + 4.0*r*(y4 - y3) - 4.0*y5*(2.0*s + r - 1.0)
+    return np.array([[j11,j12],[j21,j22]])
 
 def getdbasis(r,s):
-	return np.array([[-3.0+4.0*r+4.0*s,-1.0+4.0*r,0.0,4.0-8.0*r-4.0*s,4.0*s,-4.0*s],[-3.0+4.0*r+4.0*s,0.0,4.0*s-1.0,-4.0*r,4.0*r,4.0-4.0*r-8.0*s]])
+    return np.array([[-3.0+4.0*r+4.0*s,-1.0+4.0*r,0.0,4.0-8.0*r-4.0*s,4.0*s,-4.0*s],[-3.0+4.0*r+4.0*s,0.0,4.0*s-1.0,-4.0*r,4.0*r,4.0-4.0*r-8.0*s]])
 
 # Initialize arrays
 AA = np.zeros((ne, 36))
@@ -79,35 +79,35 @@ qx,qw = trigauss(gauord)
 
 # Main loop
 for ei in range(0,ne):
-	Aelem = np.zeros((6,6))
-	A2elem = np.zeros((6,6))
-	Belem = np.zeros(6)
-	K = E[ei,:]
-	x0, y0 = X[K[0]], Y[K[0]]
-	x1, y1 = X[K[1]], Y[K[1]]
-	x2, y2 = X[K[2]], Y[K[2]]
-	x3, y3 = X[K[3]], Y[K[3]]
-	x4, y4 = X[K[4]], Y[K[4]]
-	x5, y5 = X[K[5]], Y[K[5]]
-	for qp in range(0,len(qw)):
-		r = qx[qp,0]
-		s = qx[qp,1]
-		w = qw[qp]
-		J = getJ(x0,y0,x1,y1,x2,y2,x3,y3,x4,y4,x5,y5,r,s)
-		invJ = la.inv(J.T)
-		detJ = la.det(J)
-		dbasis = getdbasis(r,s)
-		dphi = invJ.dot(dbasis)
-		Aelem += w * (dphi.T).dot(dphi) * detJ
-		A2elem += w * detJ * ((np.array([phi(i,r,s) for i in range(0,6)])).T).dot((np.array([phi(i,r,s) for i in range(0,6)])))
-		Belem += w * detJ * np.array([phi(i,r,s) for i in range(0,6)])
-	AA2[ei,:] = A2elem.ravel()
-	AA[ei, :] = Aelem.ravel()
-	IA[ei, :] = np.repeat(K,6)
-	JA[ei, :] = np.tile(K,6)
-	bb[ei, :] = Belem.ravel()
-	ib[ei, :] = K
-	jb[ei, :] = 0
+    Aelem = np.zeros((6,6))
+    A2elem = np.zeros((6,6))
+    Belem = np.zeros(6)
+    K = E[ei,:]
+    x0, y0 = X[K[0]], Y[K[0]]
+    x1, y1 = X[K[1]], Y[K[1]]
+    x2, y2 = X[K[2]], Y[K[2]]
+    x3, y3 = X[K[3]], Y[K[3]]
+    x4, y4 = X[K[4]], Y[K[4]]
+    x5, y5 = X[K[5]], Y[K[5]]
+    for qp in range(0,len(qw)):
+        r = qx[qp,0]
+        s = qx[qp,1]
+        w = qw[qp]
+        J = getJ(x0,y0,x1,y1,x2,y2,x3,y3,x4,y4,x5,y5,r,s)
+        invJ = la.inv(J.T)
+        detJ = la.det(J)
+        dbasis = getdbasis(r,s)
+        dphi = invJ.dot(dbasis)
+        Aelem += w * (dphi.T).dot(dphi) * detJ
+        A2elem += w * detJ * ((np.array([phi(i,r,s) for i in range(0,6)])).T).dot((np.array([phi(i,r,s) for i in range(0,6)])))
+        Belem += w * detJ * np.array([phi(i,r,s) for i in range(0,6)])
+    AA2[ei,:] = A2elem.ravel()
+    AA[ei, :] = Aelem.ravel()
+    IA[ei, :] = np.repeat(K,6)
+    JA[ei, :] = np.tile(K,6)
+    bb[ei, :] = Belem.ravel()
+    ib[ei, :] = K
+    jb[ei, :] = 0
 
 # Assembly
 A = sparse.coo_matrix((AA.ravel(), (IA.ravel(), JA.ravel())))
@@ -123,7 +123,7 @@ b = np.array(b.todense()).ravel()
 # Boundary conditions
 tol = 1e-6
 gflag = np.logical_or.reduce((abs(X) < tol,
-			      abs(Y) < tol,
+                  abs(Y) < tol,
                               abs(X-1.0) < tol,
                               abs(Y-1.0) < tol))
 Dflag = gflag
@@ -148,8 +148,23 @@ for k in range(0, len(A.data)):
 #print np.linalg.cond(A.todense())
 #u = sla.spsolve(A, b)
 #u = u + u0
+hbar, m = 1.0, 1.0
+lx, ly = 1.0, 1.0
+def uex(x, y, t=0):
+    nxs = [1, 2]#, 1]
+    nys = [1, 2]#, 2]
+    phis = []
+    for nx, ny in zip(nxs, nys):
+        En = (((hbar*np.pi)**2)/(2*m*lx*ly))*(nx**2 + ny**2)
+        phit = np.exp(-1j*t*En/hbar)
+        N = (np.sqrt(2)/lx)*(np.sqrt(2)/ly)
+        phi = np.sin(nx*x*np.pi)*np.sin(ny*y*np.pi)*phit
+        phis.append(phi)
+    return sum(phis).astype(np.complex128)
+
 
 def ic(x, y):
+    #return uex(x, y)
     return np.sin(x*np.pi)*np.sin(y*np.pi)+np.sin(2*x*np.pi)*np.sin(2*y*np.pi)
 
 imagu = complex(0.0,1.0)
@@ -158,8 +173,7 @@ tf = 5
 dt = tf / ( nt - 1.0 )
 #A = np.array(A.todense())
 #A2 = np.array(A2.todense())
-hbar = 1
-m = 1
+
 dummy = ( - imagu * hbar / ( 2 * m ) ) * A
 #U = np.matmul(np.linalg.inv(A2-0.5*dt*dummy),A2+0.5*dt*dummy)
 U = np.dot(sla.inv(A2-0.5*dt*dummy),A2+0.5*dt*dummy)
@@ -170,24 +184,42 @@ U = np.dot(sla.inv(A2-0.5*dt*dummy),A2+0.5*dt*dummy)
 psi0 = ic(X,Y)
 psi = np.array(psi0)
 fig = plt.figure()
+
+pdens = np.real(psi * np.conj(psi))
+plot_error = True
 for i in range(0,nt):
-	psi = U.dot(psi)
-	pdens = np.real(psi * np.conj(psi))
-	if(1):
-		triang = tri.Triangulation(X,Y)
-		plt.clf()
-		#fig = plt.figure()
-		surf = plt.tripcolor(X,Y,pdens, triangles=E[:,:3], cmap=plt.cm.viridis,linewidth=0.2,vmin=0,vmax=3)
-		plt.tricontour(triang, pdens, colors='k',vmin=0,vmax=3)
-		plt.xlabel('$x$')
-		plt.ylabel('$y$')
-		plt.title('$|\psi|^{2}$')
-		fig.colorbar(surf)
-		fig.tight_layout()
-		plt.pause(0.001)
-		#plt.savefig('Frames/Frame'+str(i).zfill(3)+'.png')
-		#plt.close()
-		#print 'Saved frame ',i
+    num = 2 if plot_error else 1
+    if 1:
+        triang = tri.Triangulation(X,Y)
+        plt.clf()
+
+        ax = fig.add_subplot(1,num,1)
+        ax.set_title("Calculated $|\psi|^{2}$"+", t={0:.3f}/{1:.3f}".format(dt*i, tf))
+        ax.set_xlabel("$x$")
+        ax.set_ylabel("$y$")
+        surf = ax.tripcolor(X, Y, pdens, triangles=E[:,:6], cmap=plt.cm.jet, linewidth=0.2)
+        ax.tricontour(triang, pdens, colors='k',vmin=0,vmax=3)
+        fig.colorbar(surf)
+        fig.tight_layout()
+
+        if plot_error:
+            ax = fig.add_subplot(1,num,2)
+            psit = uex(X, Y, t = i*dt)
+            pdens_true = np.real(np.conj(psit) * psit)
+            ax.set_title("True $|\psi|^{2}$"+", t={0:.3f}/{1:.3f}".format(dt*i, tf))
+            ax.set_xlabel("$x$")
+            ax.set_ylabel("$y$")
+            surf = ax.tripcolor(X, Y, pdens_true, triangles=E[:,:6], cmap=plt.cm.jet, linewidth=0.2)        
+            ax.tricontour(triang, pdens_true, colors='k',vmin=0,vmax=3)
+            fig.colorbar(surf)
+            fig.tight_layout()
+        plt.pause(0.001)
+
+    psi = U.dot(psi)
+    pdens = np.real(psi * np.conj(psi))
+        #plt.savefig('Frames/Frame'+str(i).zfill(3)+'.png')
+        #plt.close()
+        #print 'Saved frame ',i
 
 #fig = plt.figure()
 #ax = plt.gca(projection='3d')
@@ -198,15 +230,15 @@ for i in range(0,nt):
 #plt.ylabel('y')
 #plt.show()
 
-#	fig = plt.figure()
-#	ax = plt.gca(projection='3d')
-#	surf = ax.plot_trisurf(X, Y, u, triangles=E, cmap=plt.cm.jet, linewidth=0.2)
-#	fig.colorbar(surf)
-#	plt.title('Numerical')
-#	plt.title(r'$u\left(x,y\right)$')
-#	plt.xlabel('x')
-#	plt.ylabel('y')
-#	plt.show()
+#   fig = plt.figure()
+#   ax = plt.gca(projection='3d')
+#   surf = ax.plot_trisurf(X, Y, u, triangles=E, cmap=plt.cm.jet, linewidth=0.2)
+#   fig.colorbar(surf)
+#   plt.title('Numerical')
+#   plt.title(r'$u\left(x,y\right)$')
+#   plt.xlabel('x')
+#   plt.ylabel('y')
+#   plt.show()
 
 #fig = plt.figure()
 #ax = plt.gca(projection='3d')
