@@ -68,6 +68,7 @@ JB = np.zeros((ne, num_bases**2))
 
 for t in range(ne):
     K = E[t]
+
     def Jacobian(r, s):
         dphi = np.zeros((2, num_bases))
         J = np.zeros((2,2))
@@ -91,15 +92,19 @@ for t in range(ne):
             dphi[1, i-1] = dphi_ds(i, r, s, elem=elem)
         dlambda = np.dot(invJ, dphi)
 
-        return detJ*(dlambda.T @ dlambda)
+        return detJ*np.dot(dlambda.T, dlambda)
 
     # matrix multiplying the derivative
     def b(r, s):
         phis = np.zeros((2, num_bases))
+        J = Jacobian(r, s)
+        invJ = la.inv(J.T)
+        detJ = la.det(J)
         for i in range(1,num_bases+1):
             phis[0, i-1] = phi(i, r, s, elem=elem)
             phis[1, i-1] = phi(i, r, s, elem=elem)
-        return np.dot(phis.T, phis)
+        lambdas = phis#np.dot(invJ, phis)
+        return np.dot(lambdas.T, lambdas)
 
 
 
@@ -109,7 +114,7 @@ for t in range(ne):
     B_local = integral(b)
     #A_local = np.dot(la.inv(B_local), A_local)
 
-    A_local = -2j*A_local*(hbar/(2.0*m))
+    #A_local = -2j*A_local*(hbar/(2.0*m))
 
     # assign to global matrices
     AA[t, :] = A_local.ravel()
@@ -149,6 +154,7 @@ plt.show()
 """
 
 # Then mark the diagonal as 1.0 and the off diagonals as 0.0 for each boundary vertex
+
 for k in range(len(A.data)):
     i = A.row[k]
     j = A.col[k]
@@ -160,24 +166,53 @@ for k in range(len(A.data)):
 
 
 # A is the Hamiltonian
-A = A.tocsr()
-A = np.dot(spla.inv(B), A).tocsc()
-plot = True
+#A = A.tocsr()
+#-2j*A_local*(hbar/(2.0*m))
+A = -1j*(hbar/(2.0*m))*np.dot(spla.inv(B), A)
+def convert(A):
+    B = []
+    for i in range(A.shape[0]):
+        new_row = []
+        for j in range(A.shape[1]):
+            if abs(A[i,j]-1.0) < 1e-3:
+                new_row.append(255)
+            else:
+                new_row.append(0)
+        B.append(new_row)
+    return np.array(B)
 
+plot = True
+"""
+plt.figure()
+plt.title("Real")
+Ad = A.todense()
+
+
+plt.imshow(convert(Ad.real))
+plt.colorbar()
+
+plt.figure()
+plt.title("Imaginary")
+plt.imshow(convert(Ad.imag))
+plt.colorbar()
+
+plt.show()
+"""
 
 if plot:
     fig = plt.figure()
-nt = 600
+nt = 100
 tf = .01
 # dt may be incorrect
 dt = tf/(nt+1.0)
 errors = {"EB":[], "EF":[]}
 
-EBM = sparse.eye(A.shape[0]).tocsc() - dt*A.tocsc()
+EBM = sparse.eye(A.shape[0]) - dt*A
 inv_A = spla.splu(EBM)
 #plt.figure()
 for method in ["EF"]:
     u = uex(X, Y)
+    print(u.shape)
     for i in range(nt):
         ux = uex(X, Y, i*nt)
         pdist      = np.real(np.conj(u)*u)
@@ -191,14 +226,14 @@ for method in ["EF"]:
             ax.set_title("Probability Distribution "+ method +" t={0:.3f}/{1:.3f}".format(dt*i, tf))
             ax.set_xlabel("x")
             ax.set_ylabel("y")
-            surf = ax.tripcolor(X, Y, pdist, triangles=E[:,:num_bases], cmap=plt.cm.jet, linewidth=0.2)
+            surf = ax.tripcolor(X, Y, u.real, triangles=E[:,:num_bases], cmap=plt.cm.jet, linewidth=0.2)
             fig.colorbar(surf)
             plt.pause(.001)
 
         # go to next step
         if method == "EF":
             # Euler Forward O(dt)
-            u = u- dt*A.dot(ux)
+            u = u - dt*A.dot(ux)
         else:
             # Euler Backward O(dt) but stable
             u = inv_A.solve(u)
