@@ -38,7 +38,7 @@ lx, ly = 1.0, 1.0
 ## Only works for quadratic triangle elements
 # degree = 1 num_bases = 3
 # degree = 2 num_bases = 6
-num_bases = 3
+num_bases = 6
 elem = "linear" if num_bases == 3 else "quadratic"
 ind = 2 if num_bases == 3 else 9
 E = mesh.Elmts[ind][1]
@@ -105,7 +105,7 @@ for t in range(ne):
     # matrix corresponding to the spatial derivatives
     def a(r, s):
         dphi = np.zeros((2, num_bases))
-        #J = Jacobian(r, s)
+        J = Jacobian(r, s)
         invJ = la.inv(J.T)
         detJ = abs(la.det(J))
         for i in range(1,num_bases+1):
@@ -116,15 +116,12 @@ for t in range(ne):
 
     # matrix multiplying the derivative, phi*phi
     def b(r, s):
-        phis = np.zeros((2, num_bases))
-        #J = Jacobian(r, s)
-        invJ = la.inv(J.T)
+        phis = np.zeros((1, num_bases))
+        J = Jacobian(r, s)
         detJ = abs(la.det(J))
         for i in range(1,num_bases+1):
             phis[0, i-1] = phi(i, r, s, elem=elem)
-            phis[1, i-1] = phi(i, r, s, elem=elem)
-        lambdas = np.dot(invJ, phis)
-        return detJ*np.dot(lambdas.T, lambdas)
+        return detJ*np.outer(phis, phis)
 
 
 
@@ -179,7 +176,7 @@ plt.show()
 
 # Then mark the diagonal as 1.0 and the off diagonals as 0.0 for each boundary vertex
 # this inverse converts the matrix to another format so it might be changing it...
-A = -1j*(hbar/(2.0*m))*A#np.dot(spla.inv(B), A).tocoo()
+A = -1j*(hbar/(2.0*m))*np.dot(spla.inv(B), A).tocoo()
 
 
 #print(np.all(A.data == A.data))
@@ -237,10 +234,10 @@ plt.show()
 
 if plot:
     fig = plt.figure()
-nt = 1000
-tf = 10
+nt = 100
+tf = 1
 # dt may be incorrect
-dt = tf/(nt+1.0)
+dt = tf/(nt-1.0)
 errors = {"EB":[], "EF":[]}
 
 EBM = sparse.eye(A.shape[0]) - dt*A

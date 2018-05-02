@@ -69,19 +69,13 @@ AA = np.zeros((ne, 36))
 AA2 = np.zeros((ne, 36))
 IA = np.zeros((ne, 36))
 JA = np.zeros((ne, 36))
-BB = np.zeros((ne, 36))
-IB = np.zeros((ne, 36))
-JB = np.zeros((ne, 36))
-bb = np.zeros((ne, 6))
-ib = np.zeros((ne, 6))
-jb = np.zeros((ne, 6))
+
 qx,qw = trigauss(gauord)
 
 # Main loop
 for ei in range(0,ne):
     Aelem = np.zeros((6,6))
     A2elem = np.zeros((6,6))
-    Belem = np.zeros(6)
     K = E[ei,:]
     x0, y0 = X[K[0]], Y[K[0]]
     x1, y1 = X[K[1]], Y[K[1]]
@@ -89,6 +83,8 @@ for ei in range(0,ne):
     x3, y3 = X[K[3]], Y[K[3]]
     x4, y4 = X[K[4]], Y[K[4]]
     x5, y5 = X[K[5]], Y[K[5]]
+
+    # estimate the integral using quadrature
     for qp in range(0,len(qw)):
         r = qx[qp,0]
         s = qx[qp,1]
@@ -99,15 +95,14 @@ for ei in range(0,ne):
         dbasis = getdbasis(r,s)
         dphi = invJ.dot(dbasis)
         Aelem += w * (dphi.T).dot(dphi) * detJ
-        A2elem += w * detJ * ((np.array([phi(i,r,s) for i in range(0,6)])).T).dot((np.array([phi(i,r,s) for i in range(0,6)])))
-        Belem += w * detJ * np.array([phi(i,r,s) for i in range(0,6)])
+        phis = np.array([phi(i,r,s) for i in range(0,6)])
+        A2elem += w * detJ * (phis.T).dot(phis)
+
     AA2[ei,:] = A2elem.ravel()
     AA[ei, :] = Aelem.ravel()
     IA[ei, :] = np.repeat(K,6)
     JA[ei, :] = np.tile(K,6)
-    bb[ei, :] = Belem.ravel()
-    ib[ei, :] = K
-    jb[ei, :] = 0
+
 
 # Assembly
 A = sparse.coo_matrix((AA.ravel(), (IA.ravel(), JA.ravel())))
@@ -116,24 +111,14 @@ A = A.tocoo()
 A2 = sparse.coo_matrix((AA2.ravel(), (IA.ravel(), JA.ravel())))
 A2 = A2.tocsr()
 A2 = A2.tocoo()
-b = sparse.coo_matrix((bb.ravel(), (ib.ravel(), jb.ravel())))
-b = b.tocsr()
-b = np.array(b.todense()).ravel()
 
 # Boundary conditions
 tol = 1e-6
-gflag = np.logical_or.reduce((abs(X) < tol,
-                  abs(Y) < tol,
+Dflag = np.logical_or.reduce((abs(X) < tol,
+                              abs(Y) < tol,
                               abs(X-1.0) < tol,
                               abs(Y-1.0) < tol))
-Dflag = gflag
-ID = np.where(Dflag)[0]
-Ig = np.where(gflag)[0]
-u0 = np.zeros((nv,))
-u0[Ig] = 0
-b = b - A * u0
-b[ID] = 0.0
-
+# removing this causes solution to accumulate at corners
 for k in range(0, len(A.data)):
     i = A.row[k]
     j = A.col[k]
@@ -142,6 +127,16 @@ for k in range(0, len(A.data)):
             A.data[k] = 1.0
         else:
             A.data[k] = 0.0
+
+# this doesn't seem to do much, not sure if this is needed
+for k in range(0, len(A2.data)):
+    i = A2.row[k]
+    j = A2.col[k]
+    if Dflag[i] or Dflag[j]:
+        if i == j:
+            A2.data[k] = 1.0
+        else:
+            A2.data[k] = 0.0
 
 # Now solve (and correct from above)
 #A = A.tocsr()
@@ -168,16 +163,26 @@ def ic(x, y):
     return np.sin(x*np.pi)*np.sin(y*np.pi)+np.sin(2*x*np.pi)*np.sin(2*y*np.pi)
 
 imagu = complex(0.0,1.0)
-nt = 200
+nt = 20
 tf = 5
 dt = tf / ( nt - 1.0 )
 #A = np.array(A.todense())
 #A2 = np.array(A2.todense())
 
-dummy = ( - imagu * hbar / ( 2 * m ) ) * A
+dummy = ( - imagu * hbar / ( 2.0 * m ) ) * A
 #U = np.matmul(np.linalg.inv(A2-0.5*dt*dummy),A2+0.5*dt*dummy)
-U = np.dot(sla.inv(A2-0.5*dt*dummy),A2+0.5*dt*dummy)
-
+U = np.dot(sla.inv(A2-0.5*dt*dummy),A2+0.5*dt*dummy).tocoo()
+"""
+# this becomes very unstable if done on its own
+for k in range(0, len(U.data)):
+    i = U.row[k]
+    j = U.col[k]
+    if Dflag[i] or Dflag[j]:
+        if i == j:
+            U.data[k] = 1.0
+        else:
+            U.data[k] = 0.0
+"""
 #print A
 #print A2
 #print U
@@ -213,13 +218,14 @@ for i in range(0,nt):
             ax.tricontour(triang, pdens_true, colors='k',vmin=0,vmax=3)
             fig.colorbar(surf)
             fig.tight_layout()
-        plt.pause(0.001)
+        plt.pause(0.0001)
 
     psi = U.dot(psi)
     pdens = np.real(psi * np.conj(psi))
         #plt.savefig('Frames/Frame'+str(i).zfill(3)+'.png')
         #plt.close()
         #print 'Saved frame ',i
+
 
 #fig = plt.figure()
 #ax = plt.gca(projection='3d')
