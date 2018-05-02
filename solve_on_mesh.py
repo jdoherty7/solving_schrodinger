@@ -59,9 +59,12 @@ def uex(x, y, t=0):
 
 # Create the LHS and RHS
 AA = np.zeros((ne, num_bases**2), dtype= np.complex128)
+BB = np.zeros((ne, num_bases**2), dtype= np.complex128)
 
 IA = np.zeros((ne, num_bases**2))
 JA = np.zeros((ne, num_bases**2))
+IB = np.zeros((ne, num_bases**2))
+JB = np.zeros((ne, num_bases**2))
 
 for t in range(ne):
     K = E[t]
@@ -78,7 +81,7 @@ for t in range(ne):
         return J
 
     # matrix corresponding to the spatial derivatives
-    def g(r, s):
+    def a(r, s):
         dphi = np.zeros((2, num_bases))
         J = Jacobian(r, s)
         invJ = la.inv(J.T)
@@ -102,25 +105,31 @@ for t in range(ne):
 
     # this is right hand side of 
     # ih dt u = -h*h/2/m dxx u
+    A_local = integral(a)
     B_local = integral(b)
-    A_local = integral(g)
-    A_local = np.dot(la.inv(B_local), A_local)
+    #A_local = np.dot(la.inv(B_local), A_local)
 
-    A_local = -1j*A_local*(hbar/(2.0*m))
+    A_local = -2j*A_local*(hbar/(2.0*m))
 
     # assign to global matrices
     AA[t, :] = A_local.ravel()
+    BB[t, :] = B_local.ravel()
 
     for i in range(num_bases):
         for j in range(num_bases):
             IA[t, i*num_bases+j] = K[i]
             JA[t, i*num_bases+j] = K[j]
-
+            IB[t, i*num_bases+j] = K[i]
+            JB[t, i*num_bases+j] = K[j]
 
 
 A = sparse.coo_matrix((AA.ravel(), (IA.ravel(), JA.ravel())))
 A = A.tocsr()
 A = A.tocoo()
+
+B = sparse.coo_matrix((BB.ravel(), (IB.ravel(), JB.ravel())))
+B = B.tocsr()
+B = B.tocoo()
 
 # First flag the locations of the boundary 
 tol = 1e-12
@@ -152,6 +161,7 @@ for k in range(len(A.data)):
 
 # A is the Hamiltonian
 A = A.tocsr()
+A = np.dot(spla.inv(B), A).tocsc()
 plot = True
 
 
@@ -188,7 +198,7 @@ for method in ["EF"]:
         # go to next step
         if method == "EF":
             # Euler Forward O(dt)
-            u = dt*A.dot(ux)
+            u = u- dt*A.dot(ux)
         else:
             # Euler Backward O(dt) but stable
             u = inv_A.solve(u)
