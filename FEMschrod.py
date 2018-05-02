@@ -156,23 +156,27 @@ imagu = complex(0.0,1.0)
 nt = 200
 tf = 5
 dt = tf / ( nt - 1.0 )
-A = np.array(A.todense())
-A2 = np.array(A2.todense())
+#A = np.array(A.todense())
+#A2 = np.array(A2.todense())
 hbar = 1
 m = 1
 dummy = ( - imagu * hbar / ( 2 * m ) ) * A
-U = np.matmul(np.linalg.inv(A2-0.5*dt*dummy),A2+0.5*dt*dummy)
-print A
-print A2
-print U
+#U = np.matmul(np.linalg.inv(A2-0.5*dt*dummy),A2+0.5*dt*dummy)
+U = np.dot(sla.inv(A2-0.5*dt*dummy),A2+0.5*dt*dummy)
+
+#print A
+#print A2
+#print U
 psi0 = ic(X,Y)
 psi = np.array(psi0)
+fig = plt.figure()
 for i in range(0,nt):
 	psi = U.dot(psi)
 	pdens = np.real(psi * np.conj(psi))
 	if(1):
 		triang = tri.Triangulation(X,Y)
-		fig = plt.figure()
+		plt.clf()
+		#fig = plt.figure()
 		surf = plt.tripcolor(X,Y,pdens, triangles=E[:,:3], cmap=plt.cm.viridis,linewidth=0.2,vmin=0,vmax=3)
 		plt.tricontour(triang, pdens, colors='k',vmin=0,vmax=3)
 		plt.xlabel('$x$')
@@ -180,11 +184,10 @@ for i in range(0,nt):
 		plt.title('$|\psi|^{2}$')
 		fig.colorbar(surf)
 		fig.tight_layout()
-		plt.savefig('Frames/Frame'+str(i).zfill(3)+'.png')
-		plt.cla()
-	        plt.clf()
-		plt.close()
-		print 'Saved frame ',i
+		plt.pause(0.001)
+		#plt.savefig('Frames/Frame'+str(i).zfill(3)+'.png')
+		#plt.close()
+		#print 'Saved frame ',i
 
 #fig = plt.figure()
 #ax = plt.gca(projection='3d')
