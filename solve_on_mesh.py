@@ -179,7 +179,9 @@ plt.show()
 
 # Then mark the diagonal as 1.0 and the off diagonals as 0.0 for each boundary vertex
 # this inverse converts the matrix to another format so it might be changing it...
-A = -1j*(hbar/(2.0*m))*np.dot(spla.inv(B), A).tocoo()
+A = -1j*(hbar/(2.0*m))*A#np.dot(spla.inv(B), A).tocoo()
+
+
 #print(np.all(A.data == A.data))
 #for i in (np.abs(spla.inv(spla.inv(B)).tocoo() - B)<1e-8):
 #    print(i)
