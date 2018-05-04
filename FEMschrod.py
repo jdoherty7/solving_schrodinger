@@ -13,7 +13,7 @@ rc('text', usetex=True)
 mesh = gmsh.Mesh()
 
 # Order of quadrature and mesh to use.
-gauord = 5
+gauord = 7
 mesh.read_msh('sqmesh.msh')
 
 E = mesh.Elmts[9][1]
@@ -95,9 +95,8 @@ for ei in range(0,ne):
         dbasis = getdbasis(r,s)
         dphi = invJ.dot(dbasis)
         Aelem += w * (dphi.T).dot(dphi) * detJ
-        phis = np.array([phi(i,r,s) for i in range(0,6)])
+        phis = np.array([[phi(i,r,s) for i in range(0,6)]])
         A2elem += w * detJ * (phis.T).dot(phis)
-
     AA2[ei,:] = A2elem.ravel()
     AA[ei, :] = Aelem.ravel()
     IA[ei, :] = np.repeat(K,6)
@@ -105,10 +104,10 @@ for ei in range(0,ne):
 
 
 # Assembly
-A = sparse.coo_matrix((AA.ravel(), (IA.ravel(), JA.ravel())))
+A = sparse.coo_matrix((AA.ravel(), (IA.ravel(), JA.ravel())),dtype=complex)
 A = A.tocsr()
 A = A.tocoo()
-A2 = sparse.coo_matrix((AA2.ravel(), (IA.ravel(), JA.ravel())))
+A2 = sparse.coo_matrix((AA2.ravel(), (IA.ravel(), JA.ravel())),dtype=complex)
 A2 = A2.tocsr()
 A2 = A2.tocoo()
 
@@ -124,19 +123,19 @@ for k in range(0, len(A.data)):
     j = A.col[k]
     if Dflag[i] or Dflag[j]:
         if i == j:
-            A.data[k] = 1.0
+            A.data[k] = complex(1.0,0)
         else:
-            A.data[k] = 0.0
+            A.data[k] = complex(0.0,0)
 
 # this doesn't seem to do much, not sure if this is needed
-for k in range(0, len(A2.data)):
-    i = A2.row[k]
-    j = A2.col[k]
-    if Dflag[i] or Dflag[j]:
-        if i == j:
-            A2.data[k] = 1.0
-        else:
-            A2.data[k] = 0.0
+#for k in range(0, len(A2.data)):
+#    i = A2.row[k]
+#    j = A2.col[k]
+#    if Dflag[i] or Dflag[j]:
+#        if i == j:
+#            A2.data[k] = complex(1.0,0)
+#        else:
+#            A2.data[k] = complex(0.0,0.0)
 
 # Now solve (and correct from above)
 #A = A.tocsr()
@@ -145,44 +144,41 @@ for k in range(0, len(A2.data)):
 #u = u + u0
 hbar, m = 1.0, 1.0
 lx, ly = 1.0, 1.0
-def uex(x, y, t=0):
-    nxs = [1, 2]#, 1]
-    nys = [1, 2]#, 2]
-    phis = []
-    for nx, ny in zip(nxs, nys):
-        En = (((hbar*np.pi)**2)/(2*m*lx*ly))*(nx**2 + ny**2)
-        phit = np.exp(-1j*t*En/hbar)
-        N = (np.sqrt(2)/lx)*(np.sqrt(2)/ly)
-        phi = np.sin(nx*x*np.pi)*np.sin(ny*y*np.pi)*phit
-        phis.append(phi)
-    return sum(phis).astype(np.complex128)
-
+def uex(x, y, t):
+    #nxs = [1, 2]#, 1]
+    #nys = [1, 2]#, 2]
+    #phis = []
+    #for nx, ny in zip(nxs, nys):
+    #    En = (((hbar*np.pi)**2)/(2*m*lx*ly))*(nx**2 + ny**2)
+    #    phit = np.exp(-1j*t*En/hbar)
+    #    N = (np.sqrt(2)/lx)*(np.sqrt(2)/ly)
+    #    phi = np.sin(nx*x*np.pi)*np.sin(ny*y*np.pi)*phit
+    #    phis.append(phi)
+    #return sum(phis).astype(np.complex128)
+    return (np.sin(x*np.pi)*np.sin(y*np.pi)*np.exp(-1j*t*((((hbar*np.pi)**2)/(2*m*lx*ly))*(1**2 + 1**2)))+np.sin(2*x*np.pi)*np.sin(2*y*np.pi)*np.exp(-1j*t*((((hbar*np.pi)**2)/(2*m*lx*ly))*(2**2 + 2**2))))/np.sqrt(2)
 
 def ic(x, y):
     #return uex(x, y)
-    return np.sin(x*np.pi)*np.sin(y*np.pi)+np.sin(2*x*np.pi)*np.sin(2*y*np.pi)
-
+    return ( np.sin(x*np.pi)*np.sin(y*np.pi)+np.sin(2*x*np.pi)*np.sin(2*y*np.pi) ) / np.sqrt(2)
 imagu = complex(0.0,1.0)
-nt = 20
-tf = 5
+nt = 200
+tf = 2.0
 dt = tf / ( nt - 1.0 )
 #A = np.array(A.todense())
 #A2 = np.array(A2.todense())
-
-dummy = ( - imagu * hbar / ( 2.0 * m ) ) * A
 #U = np.matmul(np.linalg.inv(A2-0.5*dt*dummy),A2+0.5*dt*dummy)
-U = np.dot(sla.inv(A2-0.5*dt*dummy),A2+0.5*dt*dummy).tocoo()
-"""
+U = np.dot(sla.inv(A2+A*(hbar*imagu*(dt*1)/(4.0*m))),A2-A*(hbar*imagu*(dt*1)/(4.0*m))).tocoo()
+
 # this becomes very unstable if done on its own
-for k in range(0, len(U.data)):
-    i = U.row[k]
-    j = U.col[k]
-    if Dflag[i] or Dflag[j]:
-        if i == j:
-            U.data[k] = 1.0
-        else:
-            U.data[k] = 0.0
-"""
+#for k in range(0, len(U.data)):
+#    i = U.row[k]
+#    j = U.col[k]
+#    if Dflag[i] or Dflag[j]:
+#        if i == j:
+#            U.data[k] = 1.0
+#        else:
+#            U.data[k] = 0.0
+
 #print A
 #print A2
 #print U
@@ -209,7 +205,7 @@ for i in range(0,nt):
 
         if plot_error:
             ax = fig.add_subplot(1,num,2)
-            psit = uex(X, Y, t = i*dt)
+            psit = uex(X, Y, i*dt)
             pdens_true = np.real(np.conj(psit) * psit)
             ax.set_title("True $|\psi|^{2}$"+", t={0:.3f}/{1:.3f}".format(dt*i, tf))
             ax.set_xlabel("$x$")
