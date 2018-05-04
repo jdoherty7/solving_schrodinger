@@ -161,7 +161,7 @@ def ic(x, y):
     #return uex(x, y)
     return ( np.sin(x*np.pi)*np.sin(y*np.pi)+np.sin(2*x*np.pi)*np.sin(2*y*np.pi) ) / np.sqrt(2)
 imagu = complex(0.0,1.0)
-nt = 200
+nt = 6000
 tf = 2.0
 dt = tf / ( nt - 1.0 )
 #A = np.array(A.todense())
@@ -185,10 +185,12 @@ U = np.dot(sla.inv(A2+A*(hbar*imagu*(dt*1)/(4.0*m))),A2-A*(hbar*imagu*(dt*1)/(4.
 psi0 = ic(X,Y)
 psi = np.array(psi0)
 fig = plt.figure()
-
+errors=np.zeros(nt)
 pdens = np.real(psi * np.conj(psi))
 plot_error = True
 for i in range(0,nt):
+    psit = uex(X, Y, i*dt)
+    pdens_true = np.real(np.conj(psit) * psit)
     num = 2 if plot_error else 1
     if 1:
         triang = tri.Triangulation(X,Y)
@@ -205,8 +207,6 @@ for i in range(0,nt):
 
         if plot_error:
             ax = fig.add_subplot(1,num,2)
-            psit = uex(X, Y, i*dt)
-            pdens_true = np.real(np.conj(psit) * psit)
             ax.set_title("True $|\psi|^{2}$"+", t={0:.3f}/{1:.3f}".format(dt*i, tf))
             ax.set_xlabel("$x$")
             ax.set_ylabel("$y$")
@@ -215,14 +215,15 @@ for i in range(0,nt):
             fig.colorbar(surf)
             fig.tight_layout()
         plt.pause(0.0001)
-
+    errors[i] = np.linalg.norm(pdens_true-pdens,np.inf)/np.linalg.norm(pdens_true,np.inf)
     psi = U.dot(psi)
     pdens = np.real(psi * np.conj(psi))
         #plt.savefig('Frames/Frame'+str(i).zfill(3)+'.png')
         #plt.close()
         #print 'Saved frame ',i
 
-
+plt.plot(errors)
+plt.show()
 #fig = plt.figure()
 #ax = plt.gca(projection='3d')
 #surf = ax.plot_trisurf(X, Y, uex, triangles=E, cmap=plt.cm.jet, linewidth=0.2)
