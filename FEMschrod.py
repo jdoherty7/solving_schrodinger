@@ -14,7 +14,7 @@ mesh = gmsh.Mesh()
 
 # Order of quadrature and mesh to use.
 gauord = 7
-mesh.read_msh('sqmesh.msh')
+mesh.read_msh('sqmesh3.msh')
 
 E = mesh.Elmts[9][1]
 V = mesh.Verts[:,:2]
@@ -145,8 +145,8 @@ for k in range(0, len(A.data)):
 hbar, m = 1.0, 1.0
 lx, ly = 1.0, 1.0
 def uex(x, y, t=0):
-    nxs = [1, 2, 1]
-    nys = [1, 2, 2]
+    nxs = [1, 2]
+    nys = [1, 2]
     phis = []
     for nx, ny in zip(nxs, nys):
         En = (((hbar*np.pi)**2)/(2*m*lx*ly))*(nx**2 + ny**2)
@@ -155,11 +155,11 @@ def uex(x, y, t=0):
         phi = np.sin(nx*x*np.pi)*np.sin(ny*y*np.pi)*phit
         phis.append(phi)
     return sum(phis).astype(np.complex128)
-    return (np.sin(x*np.pi)*np.sin(y*np.pi)*np.exp(-1j*t*((((hbar*np.pi)**2)/(2*m*lx*ly))*(1**2 + 1**2)))+np.sin(2*x*np.pi)*np.sin(2*y*np.pi)*np.exp(-1j*t*((((hbar*np.pi)**2)/(2*m*lx*ly))*(2**2 + 2**2))))/np.sqrt(2)
+    #return (np.sin(x*np.pi)*np.sin(y*np.pi)*np.exp(-1j*t*((((hbar*np.pi)**2)/(2*m*lx*ly))*(1**2 + 1**2)))+np.sin(2*x*np.pi)*np.sin(2*y*np.pi)*np.exp(-1j*t*((((hbar*np.pi)**2)/(2*m*lx*ly))*(2**2 + 2**2))))/np.sqrt(2)
 
 def ic(x, y):
-    #return uex(x, y)
-    return ( np.sin(x*np.pi)*np.sin(y*np.pi)+np.sin(2*x*np.pi)*np.sin(2*y*np.pi) ) / np.sqrt(2)
+    return uex(x, y,t=0)
+    #return ( np.sin(x*np.pi)*np.sin(y*np.pi)+np.sin(2*x*np.pi)*np.sin(2*y*np.pi) ) / np.sqrt(2)
 imagu = complex(0.0,1.0)
 nt = 600
 tf = 2.0
