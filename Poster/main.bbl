@@ -1,0 +1,18 @@
+\begin{thebibliography}{1}
+
+\bibitem{SakuraiQM}
+J.~Sakurai.
+\newblock {\em Modern Quantum Mechanics}.
+\newblock Pearson, 2010.
+
+\bibitem{CN}
+J.~Crank and P.~Nicolson.
+\newblock A practical method for numerical evaluation of solutions of partial
+  differential equations of heat-conduction type.
+\newblock {\em Advances in Computational Mathematics}, 43(1):50--67, 1947.
+
+\bibitem{DoubleSlitExperiment}
+J.~Schombert.
+\newblock Two-slit experiments.
+
+\end{thebibliography}

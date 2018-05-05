@@ -155,7 +155,7 @@ which satisfies:
 %	ALGORITHM
 %----------------------------------------------------------------------------------------
 \begin{block}{Problem descriptions}
-	The problem to solve is the 2D TDSE (equation \eqref{SchrodPosBasis}) for the double slit experiment with the following restrictions:
+The problem to solve is the 2D TDSE (equation \eqref{SchrodPosBasis}) for the double slit experiment with the following restrictions:
 	\begin{gather}
 	V=0,\quad\Omega=\left[0,1\right]^{2},\quad\psi = 0\text{ on } \partial\Omega
 	\end{gather}
@@ -193,17 +193,17 @@ The method was tested with the 2D infinite square well (homogeneous Dirichlet bo
 %	METHODS
 %----------------------------------------------------------------------------------------
 
-\begin{block}{Results 2}
-
-Donec faucibus purus at tortor egestas eu fermentum dolor facilisis. Maecenas tempor dui eu neque fringilla rutrum. Mauris \emph{lobortis} nisl accumsan.
-
-Nulla ut porttitor enim. Suspendisse venenatis dui eget eros gravida tempor. Mauris feugiat elit et augue placerat ultrices. Morbi accumsan enim nec tortor consectetur non commodo.
-
+\begin{block}{Double slit experiment}
+The domain is similar to $\Omega=[-1,1]$ with the presence of a division at $x=0$ and two slits at around $y=0$ connecting the two halves. Homogeneous Dirichlet boundary conditions were used, as well as a plane wave initial condition $\exp\left(ikx\right)$.
 \begin{figure}[H]
-\includegraphics[width=0.8\linewidth]{placeholder.jpg}
-\caption{Figure caption}
+\includegraphics[width=\linewidth]{DoubleSlit0.png}
+\caption{Initial conditions for double slit.}
 \end{figure}
-
+The wave travels to the right and hits the slits. A part is reflected, and the other goes through the slits and experience interference:
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{DoubleSlit115.png}
+	\caption{Double slit solution.}
+\end{figure}
 \end{block}
 
 %----------------------------------------------------------------------------------------
@@ -282,12 +282,13 @@ Nulla ut porttitor enim. Suspendisse venenatis dui eget eros gravida tempor. Mau
 %----------------------------------------------------------------------------------------
 %	CONCLUSION
 %----------------------------------------------------------------------------------------
-
+\begin{block}{}
+	From a classical perspective, one would expect to detect particles in regions with the same shape as the slits, but this does not happen. This shows the inability of the paradigm of matter as only particles or only waves to explain the behavior of quantum-scale objects, and leads to the concept of wave-particle duality.
+	
+\end{block}
 \begin{block}{Conclusion}
-
-\begin{itemize}
-\item Crank-Nicolson is a reasonable timestepping scheme for this problem based on the error statistics and the conservation of probability.
-\end{itemize}
+A numerical realization of the double slit experiment was presented, showing that the Time-Dependent Schr\"{o}dinger equation predicts wave-like behavior for objects in the quantum scale.\par
+It was also shown that Crank-Nicolson is a reasonable timestepping scheme for this problem based on the error statistics and the conservation of probability.
 
 \end{block}
 
@@ -296,9 +297,12 @@ Nulla ut porttitor enim. Suspendisse venenatis dui eget eros gravida tempor. Mau
 %----------------------------------------------------------------------------------------
 
 \begin{block}{Future Work}
-
+In order to address many systems of physical importance, the current work could be modified to make a general solver for the TDSE. This process involves the following:
 \begin{itemize}
+\item Generalize boundary conditions.
+\item Improve spatial resolution.
 \item Use time-dependent potentials.
+\item Implement in 3D.
 \end{itemize}
 
 \end{block}
@@ -311,7 +315,7 @@ Nulla ut porttitor enim. Suspendisse venenatis dui eget eros gravida tempor. Mau
 
 \nocite{*} % Insert publications even if they are not cited in the poster
 \small{\bibliographystyle{unsrt}
-\bibliography{sample}\vspace{0.75in}}
+\bibliography{bib.bib}\vspace{0.75in}}
 
 \end{block}
 
