@@ -182,7 +182,7 @@ def solve(dx, dt, tf):
 
     imagu = complex(0.0,1.0)
     nt = (tf/dt) + 1.0
-    print("nt: ",nt, int(nt))
+    #print("nt: ",nt, int(nt))
     nt = int(nt)
     #dt = tf / ( nt - 1.0 )
     
@@ -254,8 +254,8 @@ for num in range(1,5):
 # 4 = .015625
 
 
-dxs = [.25, .0625]#, .03125, .015625]
-dts = [.1, .01]
+dxs = [.25, .0625, .03125]#, .015625]
+dts = [.1, .01, .001]
 dx_small, dt_small = dxs[-1], dts[-1]
 errors_dx = []
 errors_dt = []
@@ -263,7 +263,7 @@ tf = 1
 
 
 for dt in dts:
-    print("solve: dt=",dt)
+    print("solve: dt=",dt, dx_small)
     X, Y, psi_calc = solve(dx_small, dt, tf)
     pdens_calc = np.real(np.conj(psi_calc) * psi_calc)
 
@@ -278,6 +278,7 @@ for dt in dts:
 print(errors_dt)
 
 for dx in dxs:
+    print("solve: dx=",dx, dt_small)
     X, Y, psi_calc = solve(dx, dt_small, tf)
     pdens_calc = np.real(np.conj(psi_calc) * psi_calc)
 
@@ -289,20 +290,22 @@ for dx in dxs:
     # calculated infinity norm error
     errors_dx.append(la.norm(er.flatten(), np.inf))
 
+print(errors_dx)
 
 fig = plt.figure()
 ax = fig.add_subplot(1,2,1)
-ax.set_title("Error vs $dt$, $dx$={0:.3f}, tf={1:.3f}".format(dx_small, tf))
-ax.set_yscale("log")
+ax.set_title("Error vs $dt$, $dx$={0:.3f}, $tf$={1:.3f}".format(dx_small, tf))
+#ax.set_yscale("log")
 ax.set_xlabel("$dt$")
-ax.set_ylabel("$\|error\|_{inf}$")
+ax.set_ylabel("$\|error\|_{\infty}$")
 ax.plot(dts, errors_dt)
 
 
 ax = fig.add_subplot(1,2,2)
-ax.set_title("Error vs $dx$, $dt$={0:.3f}, tf={1:.3f}".format(dt_small, tf))
+ax.set_title("Error vs $dx$, $dt$={0:.3f}, $tf$={1:.3f}".format(dt_small, tf))
+#ax.set_yscale("log")
 ax.set_xlabel("$dx$")
-ax.set_ylabel("$\|error\|_{inf}$")
+ax.set_ylabel("$\|error\|_{\infty}$")
 ax.plot(dxs, errors_dx)
 
 plt.show()

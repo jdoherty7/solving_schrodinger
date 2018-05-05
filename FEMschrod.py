@@ -144,24 +144,24 @@ for k in range(0, len(A.data)):
 #u = u + u0
 hbar, m = 1.0, 1.0
 lx, ly = 1.0, 1.0
-def uex(x, y, t):
-    #nxs = [1, 2]#, 1]
-    #nys = [1, 2]#, 2]
-    #phis = []
-    #for nx, ny in zip(nxs, nys):
-    #    En = (((hbar*np.pi)**2)/(2*m*lx*ly))*(nx**2 + ny**2)
-    #    phit = np.exp(-1j*t*En/hbar)
-    #    N = (np.sqrt(2)/lx)*(np.sqrt(2)/ly)
-    #    phi = np.sin(nx*x*np.pi)*np.sin(ny*y*np.pi)*phit
-    #    phis.append(phi)
-    #return sum(phis).astype(np.complex128)
+def uex(x, y, t=0):
+    nxs = [1, 2, 1]
+    nys = [1, 2, 2]
+    phis = []
+    for nx, ny in zip(nxs, nys):
+        En = (((hbar*np.pi)**2)/(2*m*lx*ly))*(nx**2 + ny**2)
+        phit = np.exp(-1j*t*En/hbar)
+        N = (np.sqrt(2)/lx)*(np.sqrt(2)/ly)
+        phi = np.sin(nx*x*np.pi)*np.sin(ny*y*np.pi)*phit
+        phis.append(phi)
+    return sum(phis).astype(np.complex128)
     return (np.sin(x*np.pi)*np.sin(y*np.pi)*np.exp(-1j*t*((((hbar*np.pi)**2)/(2*m*lx*ly))*(1**2 + 1**2)))+np.sin(2*x*np.pi)*np.sin(2*y*np.pi)*np.exp(-1j*t*((((hbar*np.pi)**2)/(2*m*lx*ly))*(2**2 + 2**2))))/np.sqrt(2)
 
 def ic(x, y):
     #return uex(x, y)
     return ( np.sin(x*np.pi)*np.sin(y*np.pi)+np.sin(2*x*np.pi)*np.sin(2*y*np.pi) ) / np.sqrt(2)
 imagu = complex(0.0,1.0)
-nt = 6000
+nt = 600
 tf = 2.0
 dt = tf / ( nt - 1.0 )
 #A = np.array(A.todense())
@@ -182,7 +182,7 @@ U = np.dot(sla.inv(A2+A*(hbar*imagu*(dt*1)/(4.0*m))),A2-A*(hbar*imagu*(dt*1)/(4.
 #print A
 #print A2
 #print U
-psi0 = ic(X,Y)
+psi0 = uex(X,Y)
 psi = np.array(psi0)
 fig = plt.figure()
 errors=np.zeros(nt)
