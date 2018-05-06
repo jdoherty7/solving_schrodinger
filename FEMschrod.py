@@ -14,7 +14,7 @@ mesh = gmsh.Mesh()
 
 # Order of quadrature and mesh to use.
 gauord = 7
-mesh.read_msh('sqmesh0.msh')
+mesh.read_msh('sqmesh2.msh')
 
 E = mesh.Elmts[9][1]
 V = mesh.Verts[:,:2]
@@ -151,7 +151,7 @@ def uex(x, y, t=0):
     for nx, ny in zip(nxs, nys):
         En = (((hbar*np.pi)**2)/(2*m*lx*ly))*(nx**2 + ny**2)
         phit = np.exp(-1j*t*En/hbar)
-        N = (np.sqrt(2)/lx)*(np.sqrt(2)/ly)
+        N = (np.sqrt(2)/lx)*(np.sqrt(2)/ly)*(1./4)
         phi = N*np.sin(nx*x*np.pi)*np.sin(ny*y*np.pi)*phit
         phis.append(phi)
     return sum(phis).astype(np.complex128)
@@ -216,8 +216,11 @@ for i in range(0,nt):
             fig.tight_layout()
         plt.pause(0.0001)
     errors[i] = np.linalg.norm(pdens_true-pdens,np.inf)/np.linalg.norm(pdens_true,np.inf)
+    print("errors:", errors[i])
     psi = U.dot(psi)
     pdens = np.real(psi * np.conj(psi))
+    
+    print(np.sum(pdens.flatten())*.0625**2)
         #plt.savefig('Frames/Frame'+str(i).zfill(3)+'.png')
         #plt.close()
         #print 'Saved frame ',i
