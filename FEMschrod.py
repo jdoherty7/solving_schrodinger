@@ -249,3 +249,18 @@ plt.show()
 #fig.colorbar(surf)
 #plt.title('Difference')
 #plt.show()
+"""
+solve: dt= 0.1 0.03125
+/home/ubuntu-boot/anaconda3/lib/python3.6/site-packages/scipy/sparse/linalg/dsolve/linsolve.py:253: SparseEfficiencyWarning: splu requires CSC matrix format
+  warn('splu requires CSC matrix format', SparseEfficiencyWarning)
+/home/ubuntu-boot/anaconda3/lib/python3.6/site-packages/scipy/sparse/linalg/dsolve/linsolve.py:171: SparseEfficiencyWarning: spsolve is more efficient when sparse b is in the CSC matrix format
+  'is in the CSC matrix format', SparseEfficiencyWarning)
+solve: dt= 0.01 0.03125
+solve: dt= 0.001 0.03125
+[0.25502990412114501, 0.22535568712856358, 0.028496573076750353]
+solve: dx= 0.25 0.001
+solve: dx= 0.0625 0.001
+solve: dx= 0.03125 0.001
+[0.44050776566376482, 0.030163971485563934, 0.028496573076750353]
+
+"""

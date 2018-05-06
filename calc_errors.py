@@ -202,9 +202,11 @@ def solve(dx, dt, tf):
 
 
 
-"""
+
 for num in range(1,5):
     name = "sqmesh"+str(num)+".msh"
+    #name = "sqmesh.msh"
+
     print(name)
     mesh = gmsh.Mesh()
     mesh.read_msh(name)
@@ -240,13 +242,13 @@ for num in range(1,5):
     dx = min_dist
 
     print("num: ", num)
-    #print("min_dist: ", min_dist)
+    print("min_dist: ", min_dist)
     print("max_dist: ", max_dist)
-"""
+
     #print("dx: ",dx)
 
 # approximate max_dist
-
+# ""= .0625
 # 0 = .25
 # 1 = 
 # 2 = .0625
@@ -254,8 +256,8 @@ for num in range(1,5):
 # 4 = .015625
 
 
-dxs = [.25, .0625, .03125]#, .015625]
-dts = [.1, .01, .001]
+#dxs = [.25, .0625]#, .03125]#, .015625]
+#dts = [.1, .01]
 dx_small, dt_small = dxs[-1], dts[-1]
 errors_dx = []
 errors_dt = []
@@ -272,6 +274,7 @@ for dt in dts:
     pdens_true = np.real(np.conj(psi_true) * psi_true)
 
     er = pdens_true - pdens_calc
+    print("er: ",er)
     # calculated infinity norm error
     errors_dt.append(la.norm(er.flatten(), np.inf))
 
@@ -287,6 +290,8 @@ for dx in dxs:
     pdens_true = np.real(np.conj(psi_true) * psi_true)
 
     er = pdens_true - pdens_calc
+    print("er: ",er)
+
     # calculated infinity norm error
     errors_dx.append(la.norm(er.flatten(), np.inf))
 
