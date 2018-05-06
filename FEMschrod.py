@@ -14,7 +14,7 @@ mesh = gmsh.Mesh()
 
 # Order of quadrature and mesh to use.
 gauord = 7
-mesh.read_msh('sqmesh3.msh')
+mesh.read_msh('sqmesh0.msh')
 
 E = mesh.Elmts[9][1]
 V = mesh.Verts[:,:2]
@@ -152,7 +152,7 @@ def uex(x, y, t=0):
         En = (((hbar*np.pi)**2)/(2*m*lx*ly))*(nx**2 + ny**2)
         phit = np.exp(-1j*t*En/hbar)
         N = (np.sqrt(2)/lx)*(np.sqrt(2)/ly)
-        phi = np.sin(nx*x*np.pi)*np.sin(ny*y*np.pi)*phit
+        phi = N*np.sin(nx*x*np.pi)*np.sin(ny*y*np.pi)*phit
         phis.append(phi)
     return sum(phis).astype(np.complex128)
     #return (np.sin(x*np.pi)*np.sin(y*np.pi)*np.exp(-1j*t*((((hbar*np.pi)**2)/(2*m*lx*ly))*(1**2 + 1**2)))+np.sin(2*x*np.pi)*np.sin(2*y*np.pi)*np.exp(-1j*t*((((hbar*np.pi)**2)/(2*m*lx*ly))*(2**2 + 2**2))))/np.sqrt(2)
@@ -161,8 +161,8 @@ def ic(x, y):
     return uex(x, y,t=0)
     #return ( np.sin(x*np.pi)*np.sin(y*np.pi)+np.sin(2*x*np.pi)*np.sin(2*y*np.pi) ) / np.sqrt(2)
 imagu = complex(0.0,1.0)
-nt = 600
-tf = 2.0
+nt = 50
+tf = 1.0/np.pi
 dt = tf / ( nt - 1.0 )
 #A = np.array(A.todense())
 #A2 = np.array(A2.todense())
@@ -262,5 +262,84 @@ solve: dx= 0.25 0.001
 solve: dx= 0.0625 0.001
 solve: dx= 0.03125 0.001
 [0.44050776566376482, 0.030163971485563934, 0.028496573076750353]
+
+
+
+
+
+
+solve: dt= 0.5 0.03125
+Done Building. Inverting
+/home/ubuntu-boot/anaconda3/lib/python3.6/site-packages/scipy/sparse/linalg/dsolve/linsolve.py:253: SparseEfficiencyWarning: splu requires CSC matrix format
+  warn('splu requires CSC matrix format', SparseEfficiencyWarning)
+/home/ubuntu-boot/anaconda3/lib/python3.6/site-packages/scipy/sparse/linalg/dsolve/linsolve.py:171: SparseEfficiencyWarning: spsolve is more efficient when sparse b is in the CSC matrix format
+  'is in the CSC matrix format', SparseEfficiencyWarning)
+Done inverting Matrix. Propogating
+er:  [ -3.10719043e-11  -1.88811397e-11  -1.88811397e-11 ...,   1.45041088e-03
+  -1.44849803e-03   9.99054957e-07]
+solve: dt= 0.05 0.03125
+Done Building. Inverting
+Done inverting Matrix. Propogating
+er:  [ -1.74546660e-10  -1.79658241e-10  -1.79658241e-10 ...,  -8.80758357e-03
+   8.80860635e-03   6.03238897e-07]
+solve: dt= 0.005 0.03125
+Done Building. Inverting
+Done inverting Matrix. Propogating
+er:  [ -5.76767274e-10  -3.86077000e-10  -3.86077000e-10 ...,   3.11462443e-04
+  -3.08967433e-04   1.02607887e-06]
+[0.11951913322551189, 0.72675657194899546, 0.025475375714562487]
+
+
+solve: dx= 0.25 0.005
+Done Building. Inverting
+Done inverting Matrix. Propogating
+er:  [ -6.90885148e-03  -4.98270586e-03  -4.98270586e-03  -6.90885148e-03
+  -3.17412387e-04  -1.12228224e-04  -3.57349673e-04  -2.95594282e-05
+  -1.35885303e-03  -2.23887136e-03  -1.16831624e-04  -3.57349673e-04
+  -1.12228224e-04  -3.17412387e-04  -1.16831624e-04  -2.23887136e-03
+  -1.35885303e-03  -2.95594282e-05  -3.17412387e-04  -1.12228224e-04
+  -3.57349673e-04  -2.95594282e-05  -1.35885303e-03  -2.23887136e-03
+  -1.16831624e-04  -3.57349673e-04  -1.12228224e-04  -3.17412387e-04
+  -1.16831624e-04  -2.23887136e-03  -1.35885303e-03  -2.95594282e-05
+   5.54431976e-03  -3.76850584e-01   3.62523671e-01   3.62523671e-01
+  -3.76850584e-01  -3.93308369e-02  -1.25287469e-01  -5.73826160e-04
+   1.25234619e-01  -3.12082423e-01   3.05360452e-01   6.11284223e-02
+  -1.25287469e-01   1.25234619e-01  -5.73826160e-04   6.11284223e-02
+   3.05360452e-01   1.25234619e-01  -5.73826160e-04  -1.25287469e-01
+  -3.12082423e-01  -3.93308369e-02   1.25234619e-01  -1.25287469e-01
+  -5.73826160e-04  -2.10927393e-03  -2.51236442e-02  -1.48972962e-01
+  -4.24991514e-02  -2.01373814e-01  -2.94416925e-01  -2.04960620e-02
+  -3.31594977e-01  -1.34260465e-01   1.40653368e-01   8.82173164e-05
+   3.35153283e-01   2.85934875e-01   2.11627100e-02  -4.33815048e-01
+  -2.17341688e-01  -5.94517989e-04   2.17027571e-01  -1.02546651e-01
+   1.04398724e-01   4.37697243e-01   4.22030451e-02   1.32908920e-01
+   2.94595206e-02   1.90219626e-01   5.48585624e-03  -2.51236442e-02
+  -4.24991514e-02  -1.48972962e-01  -2.04960620e-02  -2.94416925e-01
+   2.11627100e-02   8.82173164e-05   1.40653368e-01  -1.34260465e-01
+   2.85934875e-01   3.35153283e-01  -3.31594977e-01   4.22030451e-02
+   2.94595206e-02   1.32908920e-01   5.48585624e-03   1.90219626e-01
+  -2.17341688e-01   2.17027571e-01  -5.94517989e-04   4.37697243e-01
+   1.04398724e-01   2.94595206e-02   1.32908920e-01   4.22030451e-02
+   2.85934875e-01   2.11627100e-02   3.35153283e-01   1.40653368e-01
+  -1.34260465e-01   8.82173164e-05  -3.31594977e-01  -2.94416925e-01
+  -2.04960620e-02   2.17027571e-01  -5.94517989e-04  -2.17341688e-01
+  -1.02546651e-01  -4.33815048e-01  -4.24991514e-02  -1.48972962e-01
+  -2.51236442e-02  -2.01373814e-01  -2.10927393e-03   2.94595206e-02
+   4.22030451e-02   1.32908920e-01   2.11627100e-02   2.85934875e-01
+  -2.04960620e-02   8.82173164e-05  -1.34260465e-01   1.40653368e-01
+  -2.94416925e-01  -3.31594977e-01   3.35153283e-01  -4.24991514e-02
+  -2.51236442e-02  -1.48972962e-01   2.17027571e-01  -2.17341688e-01
+  -5.94517989e-04]
+solve: dx= 0.0625 0.005
+Done Building. Inverting
+Done inverting Matrix. Propogating
+er:  [ -1.10660641e-07  -9.84427282e-08  -9.84427282e-08 ...,   1.47711425e-03
+  -1.44388351e-03  -1.18210522e-05]
+solve: dx= 0.03125 0.005
+Done Building. Inverting
+Done inverting Matrix. Propogating
+er:  [ -5.76767274e-10  -3.86077000e-10  -3.86077000e-10 ...,   3.11462443e-04
+  -3.08967433e-04   1.02607887e-06]
+[0.43769724318356995, 0.027174473076068795, 0.025475375714562487]
 
 """

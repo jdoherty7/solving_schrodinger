@@ -28,8 +28,8 @@ def uex(x, y, t=0):
 
 
 def ic(x, y):
-    #return uex(x, y)
-    return np.sin(x*np.pi)*np.sin(y*np.pi)+np.sin(2*x*np.pi)*np.sin(2*y*np.pi)
+    return uex(x, y)
+    #return np.sin(x*np.pi)*np.sin(y*np.pi)+np.sin(2*x*np.pi)*np.sin(2*y*np.pi)
 
 
 def gradphi(funcnum,r,s):
@@ -188,8 +188,9 @@ def solve(dx, dt, tf):
     
 
     dummy = ( - imagu * hbar / ( 2.0 * m ) ) * A
+    print("Done Building. Inverting")
     U = np.dot(sla.inv(A2-0.5*dt*dummy),A2+0.5*dt*dummy).tocoo()
-
+    print("Done inverting Matrix. Propogating")
     psi0 = ic(X,Y)
     psi = np.array(psi0)
 
@@ -202,7 +203,7 @@ def solve(dx, dt, tf):
 
 
 
-
+"""
 for num in range(1,5):
     name = "sqmesh"+str(num)+".msh"
     #name = "sqmesh.msh"
@@ -244,7 +245,7 @@ for num in range(1,5):
     print("num: ", num)
     print("min_dist: ", min_dist)
     print("max_dist: ", max_dist)
-
+"""
     #print("dx: ",dx)
 
 # approximate max_dist
@@ -255,17 +256,18 @@ for num in range(1,5):
 # 3 = .03125
 # 4 = .015625
 
+tf = 1./np.pi
+dxs = [.25, .0625, .03125]#, .015625]
+dts = [tf*.1, tf*.05, tf*.01, tf*.005, tf*.001, tf*.0005, tf*.0001]
 
-#dxs = [.25, .0625]#, .03125]#, .015625]
-#dts = [.1, .01]
 dx_small, dt_small = dxs[-1], dts[-1]
 errors_dx = []
 errors_dt = []
-tf = 1
 
 
 for dt in dts:
     print("solve: dt=",dt, dx_small)
+    #X, Y, psi_calc = solve(dx_small, dt, tf)
     X, Y, psi_calc = solve(dx_small, dt, tf)
     pdens_calc = np.real(np.conj(psi_calc) * psi_calc)
 
@@ -274,10 +276,13 @@ for dt in dts:
     pdens_true = np.real(np.conj(psi_true) * psi_true)
 
     er = pdens_true - pdens_calc
-    print("er: ",er)
+    print("error: ",la.norm(er.flatten(), np.inf))
+    print()
     # calculated infinity norm error
     errors_dt.append(la.norm(er.flatten(), np.inf))
 
+print("dts, and errors_dt")
+print(dts)
 print(errors_dt)
 
 for dx in dxs:
@@ -290,30 +295,64 @@ for dx in dxs:
     pdens_true = np.real(np.conj(psi_true) * psi_true)
 
     er = pdens_true - pdens_calc
-    print("er: ",er)
-
+    print("er: ",la.norm(er.flatten(), np.inf))
+    print()
     # calculated infinity norm error
     errors_dx.append(la.norm(er.flatten(), np.inf))
 
+print("dx, errors_dx")
+print(dxs)
 print(errors_dx)
+print("dxsmall, dtsmall")
+print(dx_small, dt_small)
+
+
+print("dts, and errors_dt")
+print(dts)
+print(errors_dt)
+
+"""
+# errors for
+dx_small = .03125
+dt_small = .001
+dts = [.5, .1, .05, .01, .005, .001, .0005, .0001]
+dxs = [.25, .0625, .03125]
+errors_dt = [0.11951913322551189,
+             0.25502990412114501, 
+             0.72675657194899546,
+             0.22535568712856358,
+             0.025475375714562487, 
+             0.028496573076750353,
+             0.0157386231969,
+             0.00347921170951]
+
+errors_dx = [0.44050776566376482, 
+             0.030163971485563934, 
+             0.028496573076750353]
+
+"""
 
 fig = plt.figure()
 ax = fig.add_subplot(1,2,1)
-ax.set_title("Error vs $dt$, $dx$={0:.3f}, $tf$={1:.3f}".format(dx_small, tf))
-#ax.set_yscale("log")
+ax.set_title("Error vs $dt$, $dx$={0:.4f}, $tf$={1}".format(dx_small, tf))
+ax.set_xscale("log")
+ax.set_yscale("log")
+
 ax.set_xlabel("$dt$")
 ax.set_ylabel("$\|error\|_{\infty}$")
 ax.plot(dts, errors_dt)
 
 
 ax = fig.add_subplot(1,2,2)
-ax.set_title("Error vs $dx$, $dt$={0:.3f}, $tf$={1:.3f}".format(dt_small, tf))
-#ax.set_yscale("log")
+ax.set_title("Error vs $dx$, $dt$={0:.4f}, $tf$={1}".format(dt_small, tf))
+ax.set_xscale("log")
+ax.set_yscale("log")
+
 ax.set_xlabel("$dx$")
 ax.set_ylabel("$\|error\|_{\infty}$")
 ax.plot(dxs, errors_dx)
 
-plt.show()
+plt.savefig("all_errtfpi.png")
 
 
 
