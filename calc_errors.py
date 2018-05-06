@@ -204,7 +204,7 @@ def solve(dx, dt, tf):
 
 
 """
-for num in range(1,5):
+for num in range(2,5):
     name = "sqmesh"+str(num)+".msh"
     #name = "sqmesh.msh"
 
@@ -257,14 +257,18 @@ for num in range(1,5):
 # 4 = .015625
 
 tf = 1./np.pi
-dxs = [.25, .0625, .03125]#, .015625]
-dts = [tf*.1, tf*.05, tf*.01, tf*.005, tf*.001, tf*.0005, tf*.0001]
+dxs = [.25, .0625]#, .03125, .015625]
+#dts = [tf*.1, tf*.05, tf*.01, tf*.005, tf*.001, tf*.0005, tf*.0001]
+dts = np.linspace(.01*tf, .1*tf, 4)
 
 dx_small, dt_small = dxs[-1], dts[-1]
 errors_dx = []
 errors_dt = []
 
+#dt_small = tf*.0001
+#dx_small = .03125
 
+"""
 for dt in dts:
     print("solve: dt=",dt, dx_small)
     #X, Y, psi_calc = solve(dx_small, dt, tf)
@@ -285,6 +289,7 @@ print("dts, and errors_dt")
 print(dts)
 print(errors_dt)
 
+
 for dx in dxs:
     print("solve: dx=",dx, dt_small)
     X, Y, psi_calc = solve(dx, dt_small, tf)
@@ -300,6 +305,7 @@ for dx in dxs:
     # calculated infinity norm error
     errors_dx.append(la.norm(er.flatten(), np.inf))
 
+
 print("dx, errors_dx")
 print(dxs)
 print(errors_dx)
@@ -310,7 +316,7 @@ print(dx_small, dt_small)
 print("dts, and errors_dt")
 print(dts)
 print(errors_dt)
-
+"""
 """
 # errors for
 dx_small = .03125
@@ -331,28 +337,51 @@ errors_dx = [0.44050776566376482,
              0.028496573076750353]
 
 """
+dts = [0.03183098861837907, 0.015915494309189534, 0.003183098861837907, 0.0015915494309189536, 0.0003183098861837907, 0.00015915494309189535, 3.183098861837907e-05]
+errors_dt = [0.15138477247485493, 0.0027862048134688067, 0.0035960085084334459, 0.0011064474533526436, 7.8985092501149268e-05, 6.4180386871282025e-05, 7.8332072611875248e-05]
+
+dxs = [0.25, 0.0625, 0.03125]
+errors_dx = [0.034183663150276766, 0.00054844396820330488, 7.8332072611875248e-05]
+
+dx_small, dt_small = 0.03125, 3.183098861837907e-05
+
+# with dx=.0625
+dts1 = [ 0.0031831,   0.0127324,   0.02228169,  0.03183099]
+errors_dt1 =[0.0035960085084334459, 0.0079789111381609601, 0.046029500363681475, 0.15138477247485493]
+
+
+for i in range(len(dxs)-1):
+    A = np.log(dxs[i])/np.log(dxs[i+1])
+    #A = dxs[i]/dxs[i+1]
+    B = np.log(errors_dx[i])/np.log(errors_dx[i+1])
+    print(A/B)
+
+
+
 
 fig = plt.figure()
+plt.title("Error in Infinite Square Well Problem")
 ax = fig.add_subplot(1,2,1)
-ax.set_title("Error vs $dt$, $dx$={0:.4f}, $tf$={1}".format(dx_small, tf))
+ax.set_title("Error vs $dt$, $dx$={0:.4f}, $tf$={1:.3f}".format(dx_small, tf))
 ax.set_xscale("log")
 ax.set_yscale("log")
 
 ax.set_xlabel("$dt$")
 ax.set_ylabel("$\|error\|_{\infty}$")
+#ax.plot(dts1, errors_dt1)
 ax.plot(dts, errors_dt)
 
 
 ax = fig.add_subplot(1,2,2)
-ax.set_title("Error vs $dx$, $dt$={0:.4f}, $tf$={1}".format(dt_small, tf))
+ax.set_title("Error vs $dx$, $dt$={0:.6f}, $tf$={1:.3f}".format(dt_small, tf))
 ax.set_xscale("log")
 ax.set_yscale("log")
 
 ax.set_xlabel("$dx$")
 ax.set_ylabel("$\|error\|_{\infty}$")
 ax.plot(dxs, errors_dx)
-
-plt.savefig("all_errtfpi.png")
+plt.show()
+#plt.savefig("all_errtfpi.png")
 
 
 
