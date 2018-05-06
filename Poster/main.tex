@@ -61,7 +61,7 @@
 
 \usepackage{booktabs} % Top and bottom rules for tables
 
-\usepackage{braket}
+\usepackage{braket,subcaption}
 
 %----------------------------------------------------------------------------------------
 %	TITLE SECTION 
@@ -123,12 +123,12 @@ Due to its geometric flexibility, finite element method with quadratic elements 
 \begin{equation}
 C_{ij} = \int\phi_{i}\phi_{j}V\left(\mathbf{r}\right)\,\mathrm{d}\mathbf{x}
 \end{equation}
-In terms of the global finite element matrices $A$ (stiffness), $B$ (mass), potential-weighted mass $C$, the timestepping operator (equivalent to the quantum mechanical propagator in the position basis):
+In terms of the global finite element matrices $A$ (stiffness), $B$ (mass), and potential-weighted mass $C$, the timestepping operator (equivalent to the quantum mechanical propagator in the position basis) is:
 	%\begin{equation}
 	%iv_{i}\left(\int\phi_{i}\phi_{j}\,\mathrm{d}\mathbf{x}\right)\dot{\psi}_{j}=\frac{1}{2m}v_{i}\left(\int\nabla\phi_{i}\nabla\phi_{j}\,\mathrm{d}\mathbf{x}\right)\dot{\psi}_{j}
 	%\end{equation}
 \begin{equation}
-U=\left[B+\frac{i\Delta t}{2}\left(\frac{A}{2m}+C\right)\right]^{-1}\left[B+\frac{i\Delta t}{2}\left(\frac{A}{2m}-C\right)\right]
+U=\left[B+\frac{i\Delta t}{2}\left(\frac{A}{2m}+C\right)\right]^{-1}\left[B-\frac{i\Delta t}{2}\left(\frac{A}{2m}-C\right)\right]
 \end{equation}
 which satisfies:
 \begin{equation}
@@ -154,33 +154,53 @@ which satisfies:
 %----------------------------------------------------------------------------------------
 %	ALGORITHM
 %----------------------------------------------------------------------------------------
-\begin{block}{Problem descriptions}
-The problem to solve is the 2D TDSE (equation \eqref{SchrodPosBasis}) for the double slit experiment with the following restrictions:
-	\begin{gather}
-	V=0,\quad\Omega=\left[0,1\right]^{2},\quad\psi = 0\text{ on } \partial\Omega
-	\end{gather}
-	for a variety of initial conditions.
-\end{block}
+%\begin{block}{Problem descriptions}
+%The problem to solve is the 2D TDSE (equation \eqref{SchrodPosBasis}) for the double slit experiment with the following restrictions:
+%	\begin{gather}
+%	V=0,\quad\Omega=\left[0,1\right]^{2},\quad\psi = 0\text{ on } \partial\Omega
+%	\end{gather}
+%	for a variety of initial conditions.
+%\end{block}
 \begin{block}{Test case}
-The method was tested with the 2D infinite square well (homogeneous Dirichlet boundary conditions), which has an analytical solution. The initial wavefunction is a superposition of the first two eigenstates.
+The test problem is the 2D infinite square well, defined by:
+\begin{gather}
+V=0,\quad\Omega=\left[0,1\right]^{2},\quad\psi = 0\text{ on } \partial\Omega
+\end{gather}
+which has an analytical solution. The initial wavefunction was taken to be a superposition of [EIGENSTATES YOU USED, PREFERABLY COOL-LOOKING ONES] eigenstates.
 
 \begin{figure}[H]
-\includegraphics[width=0.8\linewidth]{placeholder.jpg}
-\caption{Figure caption}
+\includegraphics[width=\linewidth]{placeholder.jpg}
+\caption{Comparison of numerical and analytical solutions.}
 \end{figure}
-\begin{table}[H]
-	\begin{tabular}{c c c}
-		\toprule
-		\textbf{Methods} & \textbf{Measurement 1} & \textbf{Measurement 2}\\
-		\midrule
-		Method 1 & 0.0003262 & 0.562 \\
-		Method 2 & 0.0015681 & 0.910 \\
-		Method 3 & 0.0009271 & 0.296 \\
-		\bottomrule
-	\end{tabular}
-	\caption{Table caption}
-\end{table}
+Error measurements were of the relative infinity norm, defined by:
+\begin{equation}
+\epsilon=\frac{\left|\left|\psi-\tilde{\psi}\right|\right|_{\infty}}{\left|\left|\tilde{\psi}\right|\right|_{\infty}}
+\end{equation}
 
+\begin{table}
+	\centering
+	\begin{subtable}{.5\textwidth}
+		\centering
+		\begin{tabular}{c c}\toprule
+			\textbf{Grid $\Delta x$} & \textbf{Error} \\\midrule
+			21 & 22 \\
+			21 & 22 \\
+			31 & 32 \\\bottomrule
+		\end{tabular}
+				\caption{Space}
+	\end{subtable}%
+	\begin{subtable}{.5\textwidth}
+		\centering
+		\begin{tabular}{c c}\toprule
+			\textbf{Timestep} & \textbf{Error} \\\midrule
+			21 & 22 \\
+			21 & 22 \\
+			31 & 32 \\\bottomrule
+		\end{tabular}
+				\caption{Time}
+	\end{subtable}
+		\caption{Summary of convergence properties.}
+\end{table}
 \end{block}
 
 %----------------------------------------------------------------------------------------
@@ -194,12 +214,12 @@ The method was tested with the 2D infinite square well (homogeneous Dirichlet bo
 %----------------------------------------------------------------------------------------
 
 \begin{block}{Double slit experiment}
-The domain is similar to $\Omega=[-1,1]$ with the presence of a division at $x=0$ and two slits at around $y=0$ connecting the two halves. Homogeneous Dirichlet boundary conditions were used, as well as a plane wave initial condition $\exp\left(ikx\right)$.
+The domain is similar to $\Omega=[-1,1]^{2}$ with a division at $x=0$ and two slits at around $y=0$ connecting the two halves. $V=0$ with homogeneous Dirichlet boundary conditions and a plane wave initial condition $\exp\left(ikx\right)$.
 \begin{figure}[H]
 \includegraphics[width=\linewidth]{DoubleSlit0.png}
 \caption{Initial conditions for double slit.}
 \end{figure}
-The wave travels to the right and hits the slits. A part is reflected, and the other goes through the slits and experience interference:
+The wave travels to the right and hits the slits. A part is reflected, and the transmitted one experiences interference:
 \begin{figure}[H]
 	\includegraphics[width=\linewidth]{DoubleSlit115.png}
 	\caption{Double slit solution.}
@@ -283,7 +303,7 @@ The wave travels to the right and hits the slits. A part is reflected, and the o
 %	CONCLUSION
 %----------------------------------------------------------------------------------------
 \begin{block}{}
-	From a classical perspective, one would expect to detect particles in regions with the same shape as the slits, but this does not happen. This shows the inability of the paradigm of matter as only particles or only waves to explain the behavior of quantum-scale objects, and leads to the concept of wave-particle duality.
+	Classically, the expected result is to detect particles in regions with the same shape as the slits, but this does not happen. This shows the inability to explain properties of quantum-scale objects by considering them as exclusively particles or waves, and leads to the concept of wave-particle duality.
 	
 \end{block}
 \begin{block}{Conclusion}
