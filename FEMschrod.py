@@ -187,7 +187,7 @@ psi = np.array(psi0)
 fig = plt.figure()
 errors=np.zeros(nt)
 pdens = np.real(psi * np.conj(psi))
-plot_error = True
+plot_error = False
 for i in range(0,nt):
     psit = uex(X, Y, i*dt)
     pdens_true = np.real(np.conj(psit) * psit)

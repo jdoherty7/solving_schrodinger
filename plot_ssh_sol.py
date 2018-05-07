@@ -27,6 +27,14 @@ nv = V.shape[0]
 X = V[:,0]
 Y = V[:,1]
 
+# Boundary conditions
+tol = 1e-6
+Dflag = np.logical_or.reduce((abs(X-1.0) < tol,
+                              ))
+ID = np.where(Dflag)[0]
+plt.figure()
+plt.scatter(X[ID], Y[ID])
+plt.show()
 
 large_pdens = np.load("final-sol-arr-low-res.npy")
 

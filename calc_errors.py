@@ -72,7 +72,24 @@ def getJ(x0,y0,x1,y1,x2,y2,x3,y3,x4,y4,x5,y5,r,s):
 def getdbasis(r,s):
     return np.array([[-3.0+4.0*r+4.0*s,-1.0+4.0*r,0.0,4.0-8.0*r-4.0*s,4.0*s,-4.0*s],[-3.0+4.0*r+4.0*s,0.0,4.0*s-1.0,-4.0*r,4.0*r,4.0-4.0*r-8.0*s]])
 
+def get_xy(dx):
+    mesh = gmsh.Mesh()
 
+    names = {.25:     "sqmesh0.msh",
+             .125:    "sqmesh1.msh",
+             .0625:   "sqmesh2.msh",
+             .03125:  "sqmesh3.msh",
+             .015625: "sqmesh4.msh"}
+    mesh.read_msh(names[dx])
+
+    E = mesh.Elmts[9][1]
+    V = mesh.Verts[:,:2]
+
+    ne = E.shape[0]
+    nv = V.shape[0]
+    X = V[:,0]
+    Y = V[:,1]
+    return X, Y
 
 def solve(dx, dt, tf):
     mesh = gmsh.Mesh()
@@ -266,7 +283,7 @@ errors_dt = []
 
 #dt_small = tf*.0001
 #dx_small = .03125
-
+"""
 
 for dt in dts:
     print("solve: dt=",dt, dx_small)
@@ -286,7 +303,7 @@ for dt in dts:
 
 print("dts, and errors_dt")
 print(dts)
-print(errors_dt)
+print(errors_dt)"""
 """
 
 for dx in dxs:
@@ -341,16 +358,37 @@ dxsmall, dtsmall = 0.0625, 0.003183098861837907
 """dts = [0.03183098861837907, 0.015915494309189534, 0.003183098861837907, 0.0015915494309189536, 0.0003183098861837907, 0.00015915494309189535, 3.183098861837907e-05]
 errors_dt = [0.037757947902033462, 0.00081088018233699266, 0.00093156711277153637, 0.00039315324002164864, 0.00017881441578604385, 0.00014682287407852268, 0.00013711099203805865]
 """
+"""
 dxs = [0.25, 0.0625, 0.03125]
 errors_dx = [0.0082592283015007206, 0.00093156711277153637, 0.00089900212711191418]
-
 """
+dx_small = .25
 dts = [0.03183098861837907, 0.015915494309189534, 0.003183098861837907, 0.0015915494309189536, 0.0003183098861837907, 0.00015915494309189535, 3.183098861837907e-05]
 errors_dt = [0.15138477247485493, 0.0027862048134688067, 0.0035960085084334459, 0.0011064474533526436, 7.8985092501149268e-05, 6.4180386871282025e-05, 7.8332072611875248e-05]
-"""
+
 dt_small = 3.183098861837907e-05
 dxs = [0.25, 0.0625, 0.03125]
 errors_dx = [0.034183663150276766, 0.00054844396820330488, 7.8332072611875248e-05]
+
+print("inf dx")
+for i in range(len(dxs)):
+    dx = dxs[i]
+    X, Y = get_xy(dx)
+    psi_true = uex(X, Y, tf)
+    pdens_true = np.real(np.conj(psi_true) * psi_true)
+    # calculated infinity norm error
+    print(dx, errors_dx[i]/la.norm(pdens_true.flatten(), np.inf))
+print("inf dt")
+X, Y = get_xy(dx_small)
+for i in range(len(errors_dt)):
+    dt = dts[i]
+    psi_true = uex(X, Y, tf)
+    pdens_true = np.real(np.conj(psi_true) * psi_true)
+    print(dt, errors_dt[i]/la.norm(pdens_true.flatten(), np.inf))
+
+
+
+
 """
 dx_small, dt_small = 0.03125, 3.183098861837907e-05
 

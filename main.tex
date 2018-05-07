@@ -96,7 +96,7 @@
 %----------------------------------------------------------------------------------------
 
 \begin{alertblock}{Abstract}
-The Time-Dependent Schr\"{o}dinger Equation (TDSE) describes the quantum state of a particle in the non relativistic regime. The lack of analytical solutions for most cases of interest motivates its study with numerical methods. We present a numerical scheme for the TDSE using Finite Element Method and Crank-Nicolson.
+The Time-Dependent Schr\"{o}dinger Equation (TDSE) describes the quantum state of a particle in the non relativistic regime. The lack of analytical solutions for most cases of interest motivates its study with numerical methods. We present a numerical scheme for the TDSE using the Finite Element Method and Crank-Nicolson.
 \end{alertblock}
 
 %----------------------------------------------------------------------------------------
@@ -166,13 +166,21 @@ The test problem is the 2D infinite square well, defined by:
 \begin{gather}
 V=0,\quad\Omega=\left[0,1\right]^{2},\quad\psi = 0\text{ on } \partial\Omega
 \end{gather}
-which has an analytical solution. The initial wavefunction was taken to be a superposition of [EIGENSTATES YOU USED, PREFERABLY COOL-LOOKING ONES] eigenstates.
+This has an analytical solution, given an initial wavefunction, which is shown below. The initial wavefunction used was a superposition of two eigenstates, $n_x=1$, $n_y=1$ and $n_x=2$, $n_y=2$.
+
+\begin{gather}
+E_n = \frac{\pi^2}{2 m l_x l_y}(n_x^2 + n_y^2)
+\end{gather}
+\begin{gather}
+\psi(x,y,t) = \sum_{n_x, n_y} \frac{1}{4} \frac{\sqrt{2}}{l_x} \frac{\sqrt{2}}{l_y} \sin(n_x \pi x) \sin(n_y \pi y) e^{-i E_n }
+\end{gather}
 
 \begin{figure}[H]
-\includegraphics[width=\linewidth]{placeholder.jpg}
-\caption{Comparison of numerical and analytical solutions.}
+\includegraphics[width=\linewidth]{toy_sol.png}
+\caption{Graph of the calculated probability distribution.}
 \end{figure}
-Error measurements were of the relative infinity norm, defined by:
+
+The error measurements taken were of the relative infinity norm at $t_f=\frac{1}{\pi}$. This is:
 \begin{equation}
 \epsilon=\frac{\left|\left|\psi-\tilde{\psi}\right|\right|_{\infty}}{\left|\left|\tilde{\psi}\right|\right|_{\infty}}
 \end{equation}
@@ -183,21 +191,21 @@ Error measurements were of the relative infinity norm, defined by:
 		\centering
 		\begin{tabular}{c c}\toprule
 			\textbf{Grid $\Delta x$} & \textbf{Error} \\\midrule
-			21 & 22 \\
-			21 & 22 \\
-			31 & 32 \\\bottomrule
+			2.5   \times 10^{-1} & 5.73 \times 10^{-2} \\
+			6.25  \times 10^{-2} & 9.00 \times 10^{-4} \\
+			3.125 \times 10^{-2} & 1.28 \times 10^{-4} \\\bottomrule
 		\end{tabular}
-				\caption{Space}
+				%\caption{Relative Error at $t_f = \frac{1}{\pi}$}
 	\end{subtable}%
 	\begin{subtable}{.5\textwidth}
 		\centering
 		\begin{tabular}{c c}\toprule
-			\textbf{Timestep} & \textbf{Error} \\\midrule
-			21 & 22 \\
-			21 & 22 \\
-			31 & 32 \\\bottomrule
+			\textbf{Timestep $\Delta t$} & \textbf{Error} \\\midrule
+			3.18 \times 10^{-2} & 2.54 \times 10^{-1} \\
+			3.18 \times 10^{-3} & 6.02 \times 10^{-3} \\
+			3.18 \times 10^{-4} & 1.32 \times 10^{-4} \\\bottomrule
 		\end{tabular}
-				\caption{Time}
+				%\caption{Relative Error at $t_f = \frac{1}{\pi}$}
 	\end{subtable}
 		\caption{Summary of convergence properties.}
 \end{table}
@@ -214,7 +222,7 @@ Error measurements were of the relative infinity norm, defined by:
 %----------------------------------------------------------------------------------------
 
 \begin{block}{Double slit experiment}
-The domain is similar to $\Omega=[-1,1]^{2}$ with a division at $x=0$ and two slits at around $y=0$ connecting the two halves. $V=0$ with homogeneous Dirichlet boundary conditions and a plane wave initial condition $\exp\left(ikx\right)$.
+The domain is similar to $\Omega=[-1,1]^{2}$ with a division at $x=0$ and two slits at around $y=0$ connecting the two halves. $V=0$ with homogeneous Dirichlet boundary conditions and a plane wave initial condition $e^{ikx}$%$\exp\left(ikx\right)$.
 \begin{figure}[H]
 \includegraphics[width=\linewidth]{DoubleSlit0.png}
 \caption{Initial conditions for double slit.}
