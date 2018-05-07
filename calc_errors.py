@@ -21,15 +21,15 @@ def uex(x, y, t=0):
     for nx, ny in zip(nxs, nys):
         En = (((hbar*np.pi)**2)/(2*m*lx*ly))*(nx**2 + ny**2)
         phit = np.exp(-1j*t*En/hbar)
-        N = (np.sqrt(2)/lx)*(np.sqrt(2)/ly)
-        phi = np.sin(nx*x*np.pi)*np.sin(ny*y*np.pi)*phit
+        N = (np.sqrt(2)/lx)*(np.sqrt(2)/ly)*(1./4)
+        phi = N*np.sin(nx*x*np.pi)*np.sin(ny*y*np.pi)*phit
         phis.append(phi)
     return sum(phis).astype(np.complex128)
 
 
 def ic(x, y):
-    #return uex(x, y)
-    return np.sin(x*np.pi)*np.sin(y*np.pi)+np.sin(2*x*np.pi)*np.sin(2*y*np.pi)
+    return uex(x, y)
+    #return np.sin(x*np.pi)*np.sin(y*np.pi)+np.sin(2*x*np.pi)*np.sin(2*y*np.pi)
 
 
 def gradphi(funcnum,r,s):
@@ -188,13 +188,13 @@ def solve(dx, dt, tf):
     
 
     dummy = ( - imagu * hbar / ( 2.0 * m ) ) * A
+    print("Done Building. Inverting")
     U = np.dot(sla.inv(A2-0.5*dt*dummy),A2+0.5*dt*dummy).tocoo()
-
+    print("Done inverting Matrix. Propogating")
     psi0 = ic(X,Y)
     psi = np.array(psi0)
-
     pdens = np.real(psi * np.conj(psi))
-    for i in range(0,nt):
+    for i in range(0,nt+1):
         psi = U.dot(psi)
         pdens = np.real(psi * np.conj(psi))
 
@@ -202,8 +202,8 @@ def solve(dx, dt, tf):
 
 
 
-
-for num in range(1,5):
+"""
+for num in range(2,5):
     name = "sqmesh"+str(num)+".msh"
     #name = "sqmesh.msh"
 
@@ -244,7 +244,7 @@ for num in range(1,5):
     print("num: ", num)
     print("min_dist: ", min_dist)
     print("max_dist: ", max_dist)
-
+"""
     #print("dx: ",dx)
 
 # approximate max_dist
@@ -255,17 +255,22 @@ for num in range(1,5):
 # 3 = .03125
 # 4 = .015625
 
+tf = 1./np.pi
+dxs = [.25]#, .0625, .03125]#, .015625]
+dts = [tf*.5, tf*.1, tf*.05, tf*.01, tf*.005, tf*.001, tf*.0005, tf*.0001]
+#dts = np.linspace(.01*tf, .1*tf, 4)[::-1]
 
-#dxs = [.25, .0625]#, .03125]#, .015625]
-#dts = [.1, .01]
 dx_small, dt_small = dxs[-1], dts[-1]
 errors_dx = []
 errors_dt = []
-tf = 1
+
+#dt_small = tf*.0001
+#dx_small = .03125
 
 
 for dt in dts:
     print("solve: dt=",dt, dx_small)
+    #X, Y, psi_calc = solve(dx_small, dt, tf)
     X, Y, psi_calc = solve(dx_small, dt, tf)
     pdens_calc = np.real(np.conj(psi_calc) * psi_calc)
 
@@ -274,11 +279,15 @@ for dt in dts:
     pdens_true = np.real(np.conj(psi_true) * psi_true)
 
     er = pdens_true - pdens_calc
-    print("er: ",er)
+    print("error: ",la.norm(er.flatten(), np.inf))
+    print()
     # calculated infinity norm error
     errors_dt.append(la.norm(er.flatten(), np.inf))
 
+print("dts, and errors_dt")
+print(dts)
 print(errors_dt)
+"""
 
 for dx in dxs:
     print("solve: dx=",dx, dt_small)
@@ -290,30 +299,100 @@ for dx in dxs:
     pdens_true = np.real(np.conj(psi_true) * psi_true)
 
     er = pdens_true - pdens_calc
-    print("er: ",er)
-
+    print("er: ",la.norm(er.flatten(), np.inf))
+    print()
     # calculated infinity norm error
     errors_dx.append(la.norm(er.flatten(), np.inf))
 
+
+print("dx, errors_dx")
+print(dxs)
 print(errors_dx)
+print("dxsmall, dtsmall")
+print(dx_small, dt_small)
+
+
+print("dts, and errors_dt")
+print(dts)
+print(errors_dt)
+"""
+"""
+# errors for
+dx_small = .03125
+dt_small = .001
+dts = [.5, .1, .05, .01, .005, .001, .0005, .0001]
+dxs = [.25, .0625, .03125]
+errors_dt = [0.11951913322551189,
+             0.25502990412114501, 
+             0.72675657194899546,
+             0.22535568712856358,
+             0.025475375714562487, 
+             0.028496573076750353,
+             0.0157386231969,
+             0.00347921170951]
+
+errors_dx = [0.44050776566376482, 
+             0.030163971485563934, 
+             0.028496573076750353]
+"""
+
+dxsmall, dtsmall = 0.0625, 0.003183098861837907
+#dts, and errors_dt
+"""dts = [0.03183098861837907, 0.015915494309189534, 0.003183098861837907, 0.0015915494309189536, 0.0003183098861837907, 0.00015915494309189535, 3.183098861837907e-05]
+errors_dt = [0.037757947902033462, 0.00081088018233699266, 0.00093156711277153637, 0.00039315324002164864, 0.00017881441578604385, 0.00014682287407852268, 0.00013711099203805865]
+"""
+dxs = [0.25, 0.0625, 0.03125]
+errors_dx = [0.0082592283015007206, 0.00093156711277153637, 0.00089900212711191418]
+
+"""
+dts = [0.03183098861837907, 0.015915494309189534, 0.003183098861837907, 0.0015915494309189536, 0.0003183098861837907, 0.00015915494309189535, 3.183098861837907e-05]
+errors_dt = [0.15138477247485493, 0.0027862048134688067, 0.0035960085084334459, 0.0011064474533526436, 7.8985092501149268e-05, 6.4180386871282025e-05, 7.8332072611875248e-05]
+"""
+dt_small = 3.183098861837907e-05
+dxs = [0.25, 0.0625, 0.03125]
+errors_dx = [0.034183663150276766, 0.00054844396820330488, 7.8332072611875248e-05]
+"""
+dx_small, dt_small = 0.03125, 3.183098861837907e-05
+
+# with dx=.0625
+dts1 = [ 0.0031831,   0.0127324,   0.02228169,  0.03183099]
+errors_dt1 =[0.0035960085084334459, 0.0079789111381609601, 0.046029500363681475, 0.15138477247485493]
+"""
+print("dx")
+for i in range(len(dxs)-1):
+    A = np.log(dxs[i])/np.log(dxs[i+1])
+    B = np.log(errors_dx[i])/np.log(errors_dx[i+1])
+    print(A/B)
+print("dt")
+for i in range(len(dts)-1):
+    A = np.log(dts[i])/np.log(dts[i+1])
+    B = np.log(errors_dt[i])/np.log(errors_dt[i+1])
+    print(A/B)
+
 
 fig = plt.figure()
+#plt.title("Error in Infinite Square Well Problem")
 ax = fig.add_subplot(1,2,1)
-ax.set_title("Error vs $dt$, $dx$={0:.3f}, $tf$={1:.3f}".format(dx_small, tf))
-#ax.set_yscale("log")
+ax.set_title("Error vs $dt$, $dx$={0:.4f}, $tf$={1:.3f}".format(dx_small, tf))
+ax.set_xscale("log")
+ax.set_yscale("log")
+
 ax.set_xlabel("$dt$")
 ax.set_ylabel("$\|error\|_{\infty}$")
+#ax.plot(dts1, errors_dt1)
 ax.plot(dts, errors_dt)
 
 
 ax = fig.add_subplot(1,2,2)
-ax.set_title("Error vs $dx$, $dt$={0:.3f}, $tf$={1:.3f}".format(dt_small, tf))
-#ax.set_yscale("log")
+ax.set_title("Error vs $dx$, $dt$={0:.6f}, $tf$={1:.3f}".format(dt_small, tf))
+ax.set_xscale("log")
+ax.set_yscale("log")
+
 ax.set_xlabel("$dx$")
 ax.set_ylabel("$\|error\|_{\infty}$")
 ax.plot(dxs, errors_dx)
-
 plt.show()
+#plt.savefig("all_errtfpi.png")
 
 
 
