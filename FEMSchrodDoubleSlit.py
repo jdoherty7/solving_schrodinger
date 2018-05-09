@@ -125,14 +125,14 @@ sxw = 0.005
 ssep = 0.15
 
 Dflag = np.logical_or.reduce((
-			      np.logical_and.reduce((X-sxw<tolx,X+sxw>-1.0*tolx,Y-0.2>-toly)),
-			      np.logical_and.reduce((X-sxw<tolx,X+sxw>-1.0*tolx,Y-ssep<toly,Y+ssep>-toly)),
-			      np.logical_and.reduce((X-sxw<tolx,X+sxw>-1.0*tolx,Y+0.2<toly)),
-				abs(X+1.0) < tolx,
-			      abs(Y-1.0) < tolx,
+                  np.logical_and.reduce((X-sxw<tolx,X+sxw>-1.0*tolx,Y-0.2>-toly)),
+                  np.logical_and.reduce((X-sxw<tolx,X+sxw>-1.0*tolx,Y-ssep<toly,Y+ssep>-toly)),
+                  np.logical_and.reduce((X-sxw<tolx,X+sxw>-1.0*tolx,Y+0.2<toly)),
+                abs(X+1.0) < tolx,
+                  abs(Y-1.0) < tolx,
                            abs(X-1.0) < tolx,
                             abs(Y+1.0) < tolx
-			    ))
+                ))
 
 gflag = Dflag
 
@@ -185,35 +185,42 @@ def uex(x, y, t):
 def ic(x, y):
     #return uex(x, y)
     #return ( np.sin(x*np.pi)*np.sin(y*np.pi)+np.sin(2*x*np.pi)*np.sin(2*y*np.pi) ) / np.sqrt(2)
-	if ( x<-0.2 and x>-0.8 and y>-0.8 and y<0.8 ):
-		return np.exp(complex(0.0,1.0) * 40.0 * x)
-	else:
-		return 0.0
+    if ( x<-0.2 and x>-0.8 and y>-0.8 and y<0.8 ):
+        return np.exp(complex(0.0,1.0) * 40.0 * x)
+    else:
+        return 0.0
 
 imagu = complex(0.0,1.0)
 nt = 600
 tf = 2.0
 dt = tf / ( nt - 1.0 )
-U = sla.spsolve(A2+A*(hbar*imagu*(dt*1)/(4.0*m)),A2-A*(hbar*imagu*(dt*1)/(4.0*m)))
+
+L = A2+A*(hbar*imagu*(dt*1)/(4.0*m))
+R = A2-A*(hbar*imagu*(dt*1)/(4.0*m))
+L = L.tocsr()
+R = R.tocsr()
+
+#U = sla.spsolve(A2+A*(hbar*imagu*(dt*1)/(4.0*m)),A2-A*(hbar*imagu*(dt*1)/(4.0*m)))
 #U = np.dot(sla.inv(A2+A*(hbar*imagu*(dt*1)/(4.0*m))),A2-A*(hbar*imagu*(dt*1)/(4.0*m))).tocoo()
 
 psi0 = np.zeros((nv))
 for i in range(0,nv):
-	psi0[i] = ic(X[i],Y[i])
+    psi0[i] = ic(X[i],Y[i])
 psi = np.array(psi0,dtype=complex)
 pdens = np.real(psi * np.conj(psi))
 fig = plt.figure()
 for i in range(0,nt):
     if 1:
         plt.clf()
-	triang = tri.Triangulation(X,Y)
-	surf = plt.tripcolor(X,Y,pdens, triangles=E[:,:3], cmap=plt.cm.viridis,linewidth=0.2,vmin=0,vmax=1)
-		#plt.tricontour(triang, pdens, colors='k',vmin=0,vmax=1)
-	plt.xlabel('$x$')
-	plt.ylabel('$y$')
-	plt.title('$|\psi|^{2}$ at t='+str(i*dt))
-	fig.colorbar(surf)
-	fig.tight_layout()
-        plt.pause(.000000001)
-    psi = U.dot(psi)
+    triang = tri.Triangulation(X,Y)
+    surf = plt.tripcolor(X,Y,pdens, triangles=E[:,:3], cmap=plt.cm.viridis,linewidth=0.2,vmin=0,vmax=1)
+    #plt.tricontour(triang, pdens, colors='k',vmin=0,vmax=1)
+    plt.xlabel('$x$')
+    plt.ylabel('$y$')
+    plt.title('$|\psi|^{2}$ at t='+str(i*dt))
+    fig.colorbar(surf)
+    fig.tight_layout()
+    plt.pause(.000000001)
+    #psi = U.dot(psi)
+    psi = sla.spsolve(L, R.dot(psi))
     pdens = np.real(psi * np.conj(psi))

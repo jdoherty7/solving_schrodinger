@@ -14,7 +14,7 @@ mesh = gmsh.Mesh()
 
 # Order of quadrature and mesh to use.
 gauord = 7
-mesh.read_msh('sqmesh2.msh')
+mesh.read_msh('sqmesh.msh')
 
 E = mesh.Elmts[9][1]
 V = mesh.Verts[:,:2]
@@ -167,7 +167,11 @@ dt = tf / ( nt - 1.0 )
 #A = np.array(A.todense())
 #A2 = np.array(A2.todense())
 #U = np.matmul(np.linalg.inv(A2-0.5*dt*dummy),A2+0.5*dt*dummy)
-U = np.dot(sla.inv(A2+A*(hbar*imagu*(dt*1)/(4.0*m))),A2-A*(hbar*imagu*(dt*1)/(4.0*m))).tocoo()
+L = A2+A*(hbar*imagu*(dt*1)/(4.0*m))
+R = A2-A*(hbar*imagu*(dt*1)/(4.0*m))
+L = L.tocsr()
+R = R.tocsr()
+#U = np.dot(sla.inv(L)), R).tocoo()
 
 # this becomes very unstable if done on its own
 #for k in range(0, len(U.data)):
@@ -187,7 +191,7 @@ psi = np.array(psi0)
 fig = plt.figure()
 errors=np.zeros(nt)
 pdens = np.real(psi * np.conj(psi))
-plot_error = False
+plot_error = True
 for i in range(0,nt):
     psit = uex(X, Y, i*dt)
     pdens_true = np.real(np.conj(psit) * psit)
@@ -217,7 +221,8 @@ for i in range(0,nt):
         plt.pause(0.0001)
     errors[i] = np.linalg.norm(pdens_true-pdens,np.inf)/np.linalg.norm(pdens_true,np.inf)
     print("errors:", errors[i])
-    psi = U.dot(psi)
+    psi = sla.spsolve(L, R.dot(psi))
+    #psi = U.dot(psi)
     pdens = np.real(psi * np.conj(psi))
     
     print(np.sum(pdens.flatten())*.0625**2)
